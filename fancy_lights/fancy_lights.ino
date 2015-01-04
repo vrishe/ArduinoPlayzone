@@ -1,3 +1,4 @@
+
 #include <avr/interrupt.h>
 #include <avr/power.h>
 #include <avr/sleep.h>
@@ -25,6 +26,9 @@ static void illuminationInitialize() {
   
   TCCR1A = _BV(COM1A1) | _BV(WGM11) | _BV(WGM10);
   TCCR1B = _BV(CS11) | _BV(CS10);
+  
+  digitalWrite(13, HIGH);
+  setup();
 }
 
 static void illuminationReset() {
@@ -124,6 +128,7 @@ static decode_results decodeResults;
 
 void setup() {
   pinMode(13, OUTPUT);
+  pinMode(3, INPUT);
   
   pinMode(diodes[0], OUTPUT);
   pinMode(diodes[1], OUTPUT);
@@ -150,11 +155,11 @@ static void processRemoteButton(const decode_results &decodeResults) {
     switch (currentCode)
     {
       case BUTTON_VOLUME_DN:
-        lightDuration = max(lightDuration + LIGHT_DURATION_DELTA, LIGHT_DURATION_MIN);
+        lightDuration = min(lightDuration + LIGHT_DURATION_DELTA, LIGHT_DURATION_MAX);
         break;
       
       case BUTTON_VOLUME_UP:
-        lightDuration = min(lightDuration - LIGHT_DURATION_DELTA, LIGHT_DURATION_MAX);
+        lightDuration = max(lightDuration - LIGHT_DURATION_DELTA, LIGHT_DURATION_MIN);
         break;
     }
   }
@@ -168,52 +173,55 @@ static inline void analogWriteLite(uint8_t pin, int value) {
 }
 
 
-static void goSleep(uint8_t, void (*)(), int);
+static void dream(uint8_t, void (*)(), int);
 
 void loop() {
   static boolean lightsEnabled = false;
   
   unsigned lightness = analogRead(0);
-
-  if (lightness < 256) {
-    if (irrecv.decode(&decodeResults)) {
-      processRemoteButton(decodeResults);
-
-      irrecv.resume();
-    }
-    if (!lightsEnabled) {
-      lightsEnabled = true;
-      
-      illuminationInitialize();
-    }
-    illumination(lightDuration);
-  } else if (lightness > 512) {
+  
+  if (lightness > 512) {
     illuminationReset();
     
-    goSleep(1, (void (*)())0, RISING);
+    dream(1, 0, LOW);
     
     lightsEnabled = false;
   }
+  if (irrecv.decode(&decodeResults)) {
+    processRemoteButton(decodeResults);
+
+    irrecv.resume();
+  }
+  if (!lightsEnabled) {
+    lightsEnabled = true;
+    
+    illuminationInitialize();
+  }
+  illumination(lightDuration);
 }
 
 
 static uint8_t sleepPinCurrent    = -1;
 static void (*sleepFuncCurrent)() =  0;
   
-static void goSleep(uint8_t pin, void (*sleepFunc)(), int mode) {
+static void dream(uint8_t pin, void (*sleepFunc)(), int mode) {
   sleepInterrupt();
   
   cli();
-  set_sleep_mode(SLEEP_MODE_STANDBY);
-  
-  sleep_bod_disable();
-  sleep_enable();
-  
+  {
+    set_sleep_mode(SLEEP_MODE_STANDBY);
+    sleep_bod_disable();
+    sleep_enable(); 
+  }
   sei();
+  
+  sleepPinCurrent = pin;
+  sleepFuncCurrent = sleepFunc; 
+  
   attachInterrupt(pin, sleepInterrupt, mode);
+  digitalWrite(13, LOW);
   
-  sleep_cpu();
-  
+  sleep_cpu(); 
   sleep_disable();
   sleep_bod_enable();
 }
@@ -226,6 +234,8 @@ static void sleepInterrupt() {
       sleepFuncCurrent = 0;
     }
     detachInterrupt(sleepPinCurrent);
+    
+    sleepPinCurrent = -1;
   }
 }
 
