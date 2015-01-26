@@ -12,6 +12,8 @@
 #define LIGHT_DURATION_MAX      LIGHT_DURATION_INITIAL * 2 - LIGHT_DURATION_MIN
 
 
+//#define DEBUG
+
 static unsigned lightDuration = LIGHT_DURATION_INITIAL;
 
 static const uint8_t diodes[] = { 5, 6, 9 };
@@ -136,6 +138,10 @@ void setup() {
   
   irrecv.enableIRIn();
   irrecv.blink13(true);
+  
+  #ifdef DEBUG
+  Serial.begin(9600);
+  #endif
 }
 
 
@@ -178,8 +184,11 @@ static void dream(uint8_t, void (*)(), int);
 void loop() {
   static boolean lightsEnabled = false;
   
-  unsigned lightness = analogRead(0);
+  unsigned lightness = map(analogRead(0), 0, 144, 1024, 0); // Max voltage here is 0.7 (= Vbe of KT315)
   
+  #ifdef DEBUG
+  Serial.println(lightness);
+  #else
   if (lightness > 512) {
     illuminationReset();
     
@@ -198,6 +207,7 @@ void loop() {
     illuminationInitialize();
   }
   illumination(lightDuration);
+  #endif
 }
 
 
