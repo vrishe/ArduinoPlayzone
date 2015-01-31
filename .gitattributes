@@ -1,0 +1,15 @@
+# Enable automatic line ending management
+* text=auto
+
+# Define the files that are known to be 'text'
+ .gitattributes text
+ .gitignore 	text
+ .cproject		text
+ .project		text
+
+*.c 			text
+*.cpp 			text
+*.h				text
+*.hpp 			text
+
+*.xml 			text

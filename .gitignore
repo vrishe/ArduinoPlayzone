@@ -1,0 +1,19 @@
+# Created by https://www.gitignore.io
+
+### XamarinStudio ###
+[Dd]ebug/
+[Rr]elease/
+
+.settings/
+
+### Project Specific ###
+/.private
+
+
+### Plaftorm: Windows ###
+[Tt]humbs.db
+
+
+### Platform: Mac OS X ###
+.DS_Store
+
