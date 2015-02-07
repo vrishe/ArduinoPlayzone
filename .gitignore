@@ -1,10 +1,10 @@
 # Created by https://www.gitignore.io
 
 ### XamarinStudio ###
-[Dd]ebug/
-[Rr]elease/
+/*/*[Dd]ebug
+/*/*[Rr]elease
 
-.settings/
+/*/.settings
 
 ### Project Specific ###
 /.private

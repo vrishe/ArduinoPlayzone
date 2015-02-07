@@ -33,6 +33,14 @@ void Driver::DrawSprite(int8_t x, int8_t y, const byte rawBytes[], byte height) 
 		}
 		digitalWrite(pinClock, LOW);
 		digitalWrite(pinLatch, HIGH);
+
+#ifdef DEBUG
+		unsigned long scanLineDelay = this->scanLineDelay;
+
+		if (scanLineDelay > 0) {
+			delay(scanLineDelay);
+		}
+#endif
 	}
 }
 
