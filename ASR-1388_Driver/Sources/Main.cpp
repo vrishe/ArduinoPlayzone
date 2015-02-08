@@ -5,18 +5,11 @@
  *      Author: Admin
  */
 
-#include "Main.h"
-
-#include <Arduino.h>
+#include "Driver.h"
 #include "cstdlib_ext.h"
 
-#include "Driver.h"
-#include "error.h"
+#include <Arduino.h>
 
-
-extern "C" void __cxa_pure_virtual() {
-  for(;;);
-}
 
 static const byte sprite[] = { 0, 36, 36, 36, 0, 102, 60, 0 }; // =)
 
@@ -32,7 +25,7 @@ static void toggleSlowDown() {
 	matrix.setScanLineDelay(matrix.getScanLineDelay() > 0 ? 0 : 32);
 }
 #endif
-
+#include "bitmatrix.h"
 void setup() {
 	matrix.Initialize(PIN_CLOCK, PIN_LATCH, PIN_DATA);
 
@@ -45,15 +38,4 @@ void setup() {
 
 void loop() {
 	matrix.DrawSprite(0, 0, sprite, _countof(sprite));
-}
-
-
-int main(void) {
-	init();
-	setup();
-
-	for(;;) {
-		loop();
-	}
-	return 0; // Never reached.
 }

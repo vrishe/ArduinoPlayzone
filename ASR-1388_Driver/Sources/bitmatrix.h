@@ -9,10 +9,8 @@
 #define SOURCES_BITMATRIX_H_
 
 
-#include "std_template.h"
-
-template<typename TCarrier, bool isNum = std::is_integral<TCarrier>::value>
-class basic_bitmatrix;
+template<typename TCarrier, bool>
+class bitmatrix_trait;
 
 
 #include <stdint.h>
@@ -24,7 +22,7 @@ class basic_bitmatrix;
 #define STRIDE(bits, type) ((((((bits) + 7) & ~7) >> 3) + (sizeof(type) - 1)) / sizeof(type))
 
 template<typename TCarrier>
-class basic_bitmatrix<TCarrier, true> {
+class bitmatrix_trait<TCarrier, true> {
 	TCarrier *data;
 
 	uint8_t bitDepth;
@@ -35,7 +33,7 @@ class basic_bitmatrix<TCarrier, true> {
 	void initStorage(const uint32_t *dimensions, size_t dimensionsCount, uint8_t bitDepth) {
 		size_t volume = 1;
 
-		for (int i = 0; i < dimensionsCount; ++i) {
+		for (size_t i = 0; i < dimensionsCount; ++i) {
 			volume *= dimensions[i];
 		}
 		volume = STRIDE(volume * bitDepth, TCarrier);
@@ -48,20 +46,20 @@ class basic_bitmatrix<TCarrier, true> {
 		memset(reinterpret_cast<void *>(this->data), 0x00, volume * sizeof(TCarrier));
 	}
 
+
+protected:
+
+	bitmatrix_trait(const uint32_t *dimensions, size_t dimensionsCount, uint8_t bitDepth) {
+		initStorage(dimensions, dimensionsCount, bitDepth);
+	}
+
+
 public:
 
-	typedef TCarrier carrier_t;
+	typedef TCarrier carrier_type;
 
-	basic_bitmatrix(const uint32_t *dimensions, size_t dimensionsCount, uint8_t bitDepth) {
-		initStorage(dimensions, dimensionsCount, bitDepth);
-	}
 
-	template<size_t dimensionsCount>
-	basic_bitmatrix(const uint32_t (&dimensions)[dimensionsCount], uint8_t bitDepth) {
-		initStorage(dimensions, dimensionsCount, bitDepth);
-	}
-
-	virtual ~basic_bitmatrix() {
+	~bitmatrix_trait() {
 		delete[] data;
 	}
 
@@ -126,6 +124,31 @@ public:
 	}
 };
 
-typedef basic_bitmatrix<uint8_t> bitmatrix;
+
+#include "type_traits_ext.h"
+
+
+template<typename TCarrier>
+class bitmatrix_base : public bitmatrix_trait<
+	typename std::remove_cv<TCarrier>::type,
+				std::is_integral<TCarrier>::value> {
+
+public:
+
+	bitmatrix_base(const uint32_t *dimensions, size_t dimensionsCount, uint8_t bitDepth)
+		: bitmatrix_trait<typename std::remove_cv<TCarrier>::type,
+			std::is_integral<TCarrier>::value>(dimensions, dimensionsCount, bitDepth) {
+		/* Nothing to do */
+	}
+
+	template<size_t dimensionsCount>
+	bitmatrix_base(const uint32_t (&dimensions)[dimensionsCount], uint8_t bitDepth)
+		: bitmatrix_trait<typename std::remove_cv<TCarrier>::type,
+			std::is_integral<TCarrier>::value>(dimensions, dimensionsCount, bitDepth) {
+		/* Nothing to do */
+	}
+};
+
+typedef bitmatrix_base<uint8_t> bitmatrix;
 
 #endif /* SOURCES_BITMATRIX_H_ */
