@@ -25,7 +25,7 @@ static void toggleSlowDown() {
 	matrix.setScanLineDelay(matrix.getScanLineDelay() > 0 ? 0 : 32);
 }
 #endif
-#include "bitmatrix.h"
+#include "array_t.h"
 void setup() {
 	matrix.Initialize(PIN_CLOCK, PIN_LATCH, PIN_DATA);
 
