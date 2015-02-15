@@ -1,10 +1,17 @@
 # Created by https://www.gitignore.io
 
-### XamarinStudio ###
+### Eclipse ###
 /*/*[Dd]ebug
 /*/*[Rr]elease
 
 /*/.settings
+
+### Visual Studio ###
+[Dd]ebug
+[Rr]elease
+ipch
+
+*.*sdf
 
 ### Project Specific ###
 /.private
