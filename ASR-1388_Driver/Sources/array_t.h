@@ -9,6 +9,7 @@
 #define SOURCES_ARRAY_T_H_
 
 
+#include <stddef.h>
 #include <stdint.h>
 
 template<typename TCarrier, uint8_t dims, bool isIntegral>
@@ -17,7 +18,7 @@ class array_trait;
 
 #include <string.h>
 
-#define NO_DIMENSION		uint32_t(-1)
+#define NO_DIMENSION		uint16_t(-1)
 #define NO_INDEX			size_t  (-1)
 
 #define ELEMENT_SIZE(bits, type)  \
@@ -28,7 +29,7 @@ class array_base {
 
 protected:
 
-	uint32_t  dimensions[dims];
+	uint16_t  dimensions[dims];
 	uint8_t   elementSize;
 	TCarrier *data;
 
@@ -71,11 +72,11 @@ public:
 		return elementSize;
 	}
 
-	uint32_t getDimensionSize(uint8_t index) const {
+	uint16_t getDimensionSize(uint8_t index) const {
 		return index < dims ? dimensions[index] : NO_DIMENSION;
 	}
 
-	virtual size_t getValueIndex(const uint32_t(&coords)[dims]) const {
+	virtual size_t getValueIndex(const uint16_t(&coords)[dims]) const {
 		size_t index = 0;
 		{
 			size_t offset = elementSize;
@@ -95,15 +96,15 @@ public:
 	TCarrier *getValueAt(size_t valueIndex) {
 		return data + valueIndex;
 	}
-	TCarrier *getValueAt(const uint32_t(&coords)[dims]) {
+	TCarrier *getValueAt(const uint16_t(&coords)[dims]) {
 		return getValueAt(getValueIndex(coords));
 	}
-	void getValueAt(const uint32_t(&coords)[dims], TCarrier *dataOut) const {
+	void getValueAt(const uint16_t(&coords)[dims], TCarrier *dataOut) const {
 		getValueAt(getValueIndex(coords), dataOut);
 	}
 
 
-	void setValueAt(const uint32_t(&coords)[dims], const TCarrier *dataIn) {
+	void setValueAt(const uint16_t(&coords)[dims], const TCarrier *dataIn) {
 		setValueAt(getValueIndex(coords), dataIn);
 	}
 };
@@ -112,7 +113,7 @@ public:
 template<typename TCarrier, uint8_t dims>
 class array_trait<TCarrier, dims, true> : public array_base<TCarrier, dims> {
 
-	void initialize(const uint32_t(&dimensions)[dims], uint8_t elementSize) {
+	void initialize(const uint16_t(&dimensions)[dims], uint8_t elementSize) {
 		size_t volume = elementSize * dimensions[0];
 
 		for (size_t i = 1; i < dims; ++i) {
@@ -127,7 +128,7 @@ class array_trait<TCarrier, dims, true> : public array_base<TCarrier, dims> {
 
 protected:
 
-	array_trait(const uint32_t(&dimensions)[dims], uint8_t elementSize) {
+	array_trait(const uint16_t(&dimensions)[dims], uint8_t elementSize) {
 		initialize(dimensions, elementSize);
 	}
 
@@ -142,7 +143,7 @@ public:
 template<typename TCarrier>
 class array_trait <TCarrier, 2, true> : public array_base<TCarrier, 2> {
 
-	void initialize(uint32_t rows, uint32_t cols, uint8_t elementSize) {
+	void initialize(uint16_t rows, uint16_t cols, uint8_t elementSize) {
 		size_t volume = elementSize * this->dimensions[0] * this->dimensions[1];
 
 		this->dimensions[0] = cols;
@@ -155,10 +156,10 @@ class array_trait <TCarrier, 2, true> : public array_base<TCarrier, 2> {
 
 protected:
 
-	array_trait(const uint32_t(&dimensions)[2], uint8_t elementSize) {
+	array_trait(const uint16_t(&dimensions)[2], uint8_t elementSize) {
 		initialize(dimensions[1], dimensions[0], elementSize);
 	}
-	array_trait(uint32_t rows, uint32_t cols, uint8_t elementSize) {
+	array_trait(uint16_t rows, uint16_t cols, uint8_t elementSize) {
 		initialize(rows, cols, elementSize);
 	}
 
@@ -170,19 +171,19 @@ public:
 	}
 
 
-	uint32_t getRows() const {
+	uint16_t getRows() const {
 		return this->dimensions[1];
 	}
-	uint32_t getCols() const {
+	uint16_t getCols() const {
 		return this->dimensions[0];
 	}
 
 
-	size_t getValueIndex(uint32_t r, uint32_t c) const {
+	size_t getValueIndex(uint16_t r, uint16_t c) const {
 		return c < this->dimensions[0] && r < this->dimensions[1] ?
 			r * this->dimensions[0] + c * this->elementSize : NO_INDEX;
 	}
-	virtual size_t getValueIndex(const uint32_t(&coords)[2]) const {
+	virtual size_t getValueIndex(const uint16_t(&coords)[2]) const {
 		return getValueIndex(coords[1], coords[0]);
 	}
 
@@ -190,24 +191,24 @@ public:
 	TCarrier *getValueAt(size_t valueIndex) {
 		return array_base<TCarrier, 2>::getValueAt(valueIndex);
 	}
-	TCarrier *getValueAt(const uint32_t(&coords)[2]) {
+	TCarrier *getValueAt(const uint16_t(&coords)[2]) {
 		return array_base<TCarrier, 2>::getValueAt(coords);
 	}
-	TCarrier *getValueAt(uint32_t r, uint32_t c) {
+	TCarrier *getValueAt(uint16_t r, uint16_t c) {
 		return array_base<TCarrier, 2>::getValueAt(getValueIndex(r, c));
 	}
-	TCarrier *operator()(uint32_t r, uint32_t c) {
+	TCarrier *operator()(uint16_t r, uint16_t c) {
 		return array_base<TCarrier, 2>::getValueAt(getValueIndex(r, c));
 	}
-	void getValueAt(const uint32_t(&coords)[2], TCarrier *dataOut) const {
+	void getValueAt(const uint16_t(&coords)[2], TCarrier *dataOut) const {
 		array_base<TCarrier, 2>::getValueAt(coords, dataOut);
 	}
 
 
-	void setValueAt(const uint32_t(&coords)[2], const TCarrier *dataIn) {
+	void setValueAt(const uint16_t(&coords)[2], const TCarrier *dataIn) {
 		array_base<TCarrier, 2>::setValueAt(coords, dataIn);
 	}
-	void setValueAt(uint32_t r, uint32_t c, const TCarrier *dataIn) {
+	void setValueAt(uint16_t r, uint16_t c, const TCarrier *dataIn) {
 		array_base<TCarrier, 2>::setValueAt(getValueIndex(r, c), dataIn);
 	}
 };
@@ -215,7 +216,7 @@ public:
 template<typename TCarrier>
 class array_trait <TCarrier, 1, true> : public array_base<TCarrier, 1>{
 
-	void initialize(uint32_t length, uint8_t elementSize) {
+	void initialize(uint16_t length, uint8_t elementSize) {
 		size_t volume = elementSize * this->dimensions[0];
 
 		this->dimensions[0] = length;
@@ -227,10 +228,10 @@ class array_trait <TCarrier, 1, true> : public array_base<TCarrier, 1>{
 
 protected:
 
-	array_trait(const uint32_t(&dimensions)[1], uint8_t elementSize) {
+	array_trait(const uint16_t(&dimensions)[1], uint8_t elementSize) {
 		initialize(dimensions[0], elementSize);
 	}
-	array_trait(uint32_t length, uint8_t elementSize) {
+	array_trait(uint16_t length, uint8_t elementSize) {
 		initialize(length, elementSize);
 	}
 
@@ -242,28 +243,28 @@ public:
 	}
 
 
-	uint32_t getLength() const {
+	uint16_t getLength() const {
 		return this->dimensions[0];
 	}
 
 
-	size_t getValueIndex(uint32_t i) const {
+	size_t getValueIndex(uint16_t i) const {
 		return i < this->dimensions[0] ? i * this->elementSize : NO_INDEX;
 	}
-	virtual size_t getValueIndex(const uint32_t(&coords)[1]) const {
+	virtual size_t getValueIndex(const uint16_t(&coords)[1]) const {
 		return getValueIndex(coords[0]);
 	}
 
 
-	TCarrier *operator[](uint32_t i) {
+	TCarrier *operator[](uint16_t i) {
 		return this->getValueAt(getValueIndex(i));
 	}
 
 
-	void setValueAt(const uint32_t(&coords)[1], const TCarrier *dataIn) {
+	void setValueAt(const uint16_t(&coords)[1], const TCarrier *dataIn) {
 		array_base<TCarrier, 2>::setValueAt(coords, dataIn);
 	}
-	void setValueAt(uint32_t i, const TCarrier *dataIn) {
+	void setValueAt(uint16_t i, const TCarrier *dataIn) {
 		this->array_base<TCarrier, 1>::setValueAt(getValueIndex(i), dataIn);
 	}
 };
@@ -282,7 +283,7 @@ class array_t : public array_trait<
 
 public:
 
-	array_t(const uint32_t (&dimensions) [dims], uint8_t elementSize)
+	array_t(const uint16_t (&dimensions) [dims], uint8_t elementSize)
 		: array_trait <typename std::remove_cv<TCarrier>::type, dims,
 			std::is_integral<TCarrier>::value>(dimensions, elementSize) {
 		/* Nothing to do */
@@ -291,31 +292,39 @@ public:
 };
 
 template<typename TCarrier>
-class matrix_t : public array_t<TCarrier, 2> {
+class matrix_t : public array_trait<
+	typename std::remove_cv<TCarrier>::type, 2,
+		std::is_integral<TCarrier>::value> {
 
 public:
 
-	matrix_t(const uint32_t(&dimensions)[2], uint8_t elementSize)
-		: array_t<TCarrier, 2>(dimensions, elementSize) {
+	matrix_t(const uint16_t(&dimensions)[2], uint8_t elementSize)
+		: array_trait<typename std::remove_cv<TCarrier>::type, 2,
+			std::is_integral<TCarrier>::value>(dimensions, elementSize) {
 		/* Nothing to do */
 	}
-	matrix_t(uint32_t rows, uint32_t cols, uint8_t elementSize)
-		: array_t <TCarrier, 2>(rows, cols, elementSize) {
+	matrix_t(uint16_t rows, uint16_t cols, uint8_t elementSize)
+		: array_trait <typename std::remove_cv<TCarrier>::type, 2,
+			std::is_integral<TCarrier>::value>(rows, cols, elementSize) {
 		/* Nothing to do */
 	}
 };
 
 template<typename TCarrier>
-class vector_t : public array_t<TCarrier, 1> {
+class vector_t : public array_trait<
+	typename std::remove_cv<TCarrier>::type, 1,
+		std::is_integral<TCarrier>::value> {
 
 public:
 
-	vector_t(const uint32_t(&dimensions)[1], uint8_t elementSize)
-		: array_t<TCarrier, 1>(dimensions, elementSize) {
+	vector_t(const uint16_t(&dimensions)[1], uint8_t elementSize)
+		: array_trait<typename std::remove_cv<TCarrier>::type, 1,
+			std::is_integral<TCarrier>::value>(dimensions, elementSize) {
 		/* Nothing to do */
 	}
-	vector_t(uint32_t length, uint8_t elementSize)
-		: array_t <TCarrier, 1>(length, elementSize) {
+	vector_t(uint16_t length, uint8_t elementSize)
+		: array_trait <typename std::remove_cv<TCarrier>::type, 1,
+			std::is_integral<TCarrier>::value>(length, elementSize) {
 		/* Nothing to do */
 	}
 };

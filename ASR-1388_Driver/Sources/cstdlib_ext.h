@@ -24,6 +24,4 @@ extern "C++"
 #endif  /* !defined (__cplusplus) */
 #endif  /* !defined (_countof) */
 
-#define bitsizeof(type) (sizeof(type) << 3)
-
 #endif /* SOURCES_CSTDLIB_EXT_H_ */

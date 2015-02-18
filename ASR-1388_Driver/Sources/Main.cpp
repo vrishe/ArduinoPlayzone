@@ -5,6 +5,7 @@
  *      Author: Admin
  */
 
+#include "Graphics/Sprite.h"
 #include "Driver.h"
 #include "cstdlib_ext.h"
 
@@ -19,6 +20,7 @@ static const byte sprite[] = { 0, 36, 36, 36, 0, 102, 60, 0 }; // =)
 #define PIN_DATA	 4
 
 static asr::Driver matrix;
+static _2d::Object<uint8_t> s(8, 8);
 
 #ifdef DEBUG
 static void toggleSlowDown() {
