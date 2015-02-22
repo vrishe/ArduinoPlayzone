@@ -85,7 +85,8 @@ public:
 	}
 
 	virtual ~Sprite() = 0;
-	virtual void render(Viewport<uunit_t, TCarrier> &viewport, rect_t<unit_t> &rect) const = 0;
+	virtual void render(Viewport<uunit_t, TCarrier> &viewport,
+			const rect_t<unit_t> &rect, const point_t<unit_t> &origin) const = 0;
 };
 
 

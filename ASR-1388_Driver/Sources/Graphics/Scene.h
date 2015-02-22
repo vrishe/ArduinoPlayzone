@@ -20,9 +20,9 @@ namespace _2d {
 template<typename TUnit, typename TCarrier>
 class Scene : public Object<TUnit> {
 
-	typedef typename std::vector<Sprite<TUnit, TCarrier>*/*, std::allocator<Sprite<TUnit>*>*/>::iterator sprite_iter;
+	typedef typename std::vector<Sprite<TUnit, TCarrier>*>::iterator sprite_iter;
 
-	std::vector<Sprite<TUnit, TCarrier>*/*, std::allocator<Sprite<TUnit>*>*/> sprites;
+	std::vector<Sprite<TUnit, TCarrier>*> sprites;
 
 
 public:
@@ -44,8 +44,6 @@ public:
 
 			offset(rcSprite, getX(), getY());
 			if (intersect(rcViewport, rcSprite, rcDrawing)) {
-				offset(rcDrawing, -rcViewport.getX(), -rcViewport.getY());
-
 				(*i)->render(viewport, rcDrawing);
 			}
 		}

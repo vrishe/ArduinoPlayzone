@@ -21,9 +21,6 @@ class array_trait;
 #define NO_DIMENSION		uint16_t(-1)
 #define NO_INDEX			size_t  (-1)
 
-#define ELEMENT_SIZE(bits, type)  \
-	(((((bits) + 7) >> 3) + (sizeof(type) - 1)) / sizeof(type))
-
 template<typename TCarrier, uint8_t dims>
 class array_base {
 

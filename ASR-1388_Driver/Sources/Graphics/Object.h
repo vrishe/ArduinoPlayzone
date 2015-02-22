@@ -54,9 +54,7 @@ protected:
 
 public:
 
-	virtual ~ObjectBase() {
-		/* Nothing to do */
-	}
+	virtual ~ObjectBase() = 0;
 
 	unit_t getX() const { return x; }
 	unit_t getY() const { return y;  }
@@ -82,6 +80,11 @@ public:
 	}
 };
 
+template<typename TUnit>
+ObjectBase<TUnit, true>::~ObjectBase() {
+	/* Nothing to do */
+}
+
 template <typename TUnit>
 class Object : public ObjectBase<TUnit, std::is_integral_unsigned<TUnit>::value> {
 	/* rotation 2d object representation. */
@@ -99,6 +102,10 @@ public:
 
 	Object(uunit_t w, uunit_t h)
 		: ObjectBase<TUnit, std::is_integral_unsigned<TUnit>::value>(w, h) {
+		/* Nothing to do */
+	}
+
+	virtual ~Object() {
 		/* Nothing to do */
 	}
 };

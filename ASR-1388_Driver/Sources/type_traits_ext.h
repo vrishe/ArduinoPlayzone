@@ -132,6 +132,27 @@ struct integral_signed : _integral_signed<TInt, is_integral<TInt>::value> {
 };
 
 
+typedef char (&_positive)[1];
+typedef char (&_negative)[2];
+
+template<typename B, typename D>
+struct is_base_of {
+	template<typename T>
+	static _positive check(D*, T);
+	static _negative check(B*, int);
+
+	struct _host {
+		operator B*() const;
+		operator D*();
+	};
+	static const bool value = (sizeof(check(_host(), 0)) == sizeof(_positive));
+};
+
+
+
+
+
+
 } /* namespace std */
 
 #endif /* SOURCES_TYPE_TRAITS_EXT_H_ */

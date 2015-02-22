@@ -33,7 +33,9 @@ protected:
 
 public:
 
-	virtual ~Viewport() = 0;
+	virtual ~Viewport() {
+		/* Nothing to do */
+	}
 	virtual TCarrier *getLine(uunit_t lineIndex) = 0;
 };
 

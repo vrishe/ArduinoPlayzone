@@ -226,12 +226,12 @@
 							<tool commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="de.innot.avreclipse.tool.linker.winavr.app.debug.783442184" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.debug"/>
 							<tool command="avr-g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="de.innot.avreclipse.tool.cpplinker.app.debug.1618248417" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.debug">
 								<option id="de.innot.avreclipse.cpplinker.option.libs.1189640964" name="Libraries (-l)" superClass="de.innot.avreclipse.cpplinker.option.libs" valueType="libs">
-									<listOptionValue builtIn="false" value="uClibc++"/>
 									<listOptionValue builtIn="false" value="ArduinoCore"/>
+									<listOptionValue builtIn="false" value="uClibc++"/>
 								</option>
 								<option id="de.innot.avreclipse.cpplinker.option.libpath.802715382" name="Libraries Path (-L)" superClass="de.innot.avreclipse.cpplinker.option.libpath" valueType="stringList">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/uClibc++}\Nano&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ArduinoCore}\Nano&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/uClibc++}\Nano&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.cpplinker.option.nosyms.67845769" name="Omit Symbols (-s)" superClass="de.innot.avreclipse.cpplinker.option.nosyms" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cpplinker.option.otherlinkargs.2081268206" name="Other Arguments" superClass="de.innot.avreclipse.cpplinker.option.otherlinkargs" value="-lm -Os" valueType="string"/>
