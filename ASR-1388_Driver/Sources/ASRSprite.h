@@ -25,8 +25,14 @@ class Sprite : public matrix_t<uint8_t>, public _2d::Sprite<uint8_t, uint8_t> {
 public:
 	Sprite(uunit_t w, uunit_t h, uint8_t *data)
 		: matrix_t<uint8_t>(h, ELEMENT_SIZE(w, uunit_t), 1),
-		  	  _2d::Sprite<uint8_t, uint8_t>(w, h) {
+			_2d::Sprite<uint8_t, uint8_t>(w, h) {
 		memcpy(this->data, data, getRows() * getCols());
+	}
+
+	Sprite(uunit_t w, uunit_t h)
+		: matrix_t<uint8_t>(h, ELEMENT_SIZE(w, uunit_t), 1),
+			_2d::Sprite<uint8_t, uint8_t>(w, h) {
+		/* Nothing to do */
 	}
 
 	virtual ~Sprite() {

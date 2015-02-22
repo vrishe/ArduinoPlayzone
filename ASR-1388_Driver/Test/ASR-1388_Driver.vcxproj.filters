@@ -19,6 +19,9 @@
     <Filter Include="Header Files\Arduino">
       <UniqueIdentifier>{0534d844-791e-4e6c-909e-5ca6d17d4914}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Arduino\Graphics">
+      <UniqueIdentifier>{157d88ec-2ed2-4ed8-8a17-f0f45761d3ce}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -39,6 +42,30 @@
     <ClInclude Include="..\Sources\type_traits_ext.h">
       <Filter>Header Files\Arduino</Filter>
     </ClInclude>
+    <ClInclude Include="..\Sources\Graphics\geom_types.h">
+      <Filter>Header Files\Arduino\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Graphics\Object.h">
+      <Filter>Header Files\Arduino\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Graphics\Scene.h">
+      <Filter>Header Files\Arduino\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Graphics\Screen.h">
+      <Filter>Header Files\Arduino\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Graphics\Sprite.h">
+      <Filter>Header Files\Arduino\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Graphics\Viewport.h">
+      <Filter>Header Files\Arduino\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\ASRSprite.h">
+      <Filter>Header Files\Arduino</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\bitutility.h">
+      <Filter>Header Files\Arduino</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -46,6 +73,12 @@
     </ClCompile>
     <ClCompile Include="ASR-1388_Driver.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\ASRSprite.cpp">
+      <Filter>Source Files\Arduino</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\bitutility.cpp">
+      <Filter>Source Files\Arduino</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

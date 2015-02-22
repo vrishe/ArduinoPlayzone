@@ -54,11 +54,11 @@ uint8_t bitcopy(uint8_t *dst, const uint8_t *src, uint16_t count, uint8_t shiftI
 
 			value = op(reg.segment.lo, dst[length]);
 		}
-		mask = 0xff >> (shiftOut + count) % 8;
+		mask = 0xff >> (shiftOut + count - 1) % 8 + 1;
 		dst[length] = (dst[length] & mask) | (value & ~mask);
 	} else if (shiftOut < shiftIn) { // Shift bits left
 		uint8_t shift = shiftIn - shiftOut;
-		uint8_t mask = 0xff >> (shiftOut + count) % 8;
+		uint8_t mask = 0xff >> (shiftOut + count - 1) % 8 + 1;
 		uint8_t value = dst[length];
 
 		value = (value & mask) | (op(src[length] << shift, value) & ~mask);
@@ -99,7 +99,7 @@ uint8_t bitcopy(uint8_t *dst, const uint8_t *src, uint16_t count, uint8_t shiftI
 			}
 			value = op(src[length], dst[length]);
 		}
-		mask = 0xff >> (shiftOut + count) % 8;
+		mask = mask != 0xff >> (shiftOut + count - 1) % 8 + 1;
 		dst[length] = (dst[length] & mask) | (value & ~mask);
 	}
 	return dst[length];

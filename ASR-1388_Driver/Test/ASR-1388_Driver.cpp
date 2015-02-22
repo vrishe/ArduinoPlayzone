@@ -4,10 +4,6 @@
 #include "stdafx.h"
 #include "ASR-1388_Driver.h"
 
-static BYTE screen[8] = { 0, 36, 36, 36, 0, 102, 60, 0 };
-
-// TODO: place screen interface code here.
-
 
 #define MAX_LOADSTRING 100
 
@@ -114,7 +110,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 }
 
 
-#define AA_RANK 3
+#define AA_RANK 2			// A power of 2.
+#define AA_(dimen) \
+	((dimen) * antialias)
 
 static HBITMAP hBmpOut;
 static HGDIOBJ hBmpRestore;
@@ -172,6 +170,73 @@ BOOL GetClientRectAntialias(HWND hWnd, LPRECT rcClient, BYTE antialias) {
 	return FALSE;
 }
 
+
+#include "Graphics/Scene.h"
+#include "Graphics/Screen.h"
+#include "ASRSprite.h"
+
+#include <stdint.h>
+
+// TODO: place screen interface code here.
+class TestScreen : public _2d::Screen<uint8_t, uint8_t, TestScreen, 8, 8> {
+
+	uint8_t data[8];
+
+public:
+	TestScreen::uunit_t *TestScreen::getLine(uunit_t lineIndex) {
+		return this->data + lineIndex;
+	}
+
+	virtual TestScreen TestScreen::getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) const {
+		return TestScreen(*this);
+	}
+
+	virtual void flush() {
+		memset(data, 0x00, sizeof(data));
+	}
+
+	void display(HDC &hDc, const RECT &client, BYTE antialias) const {
+		antialias = 1 << antialias;
+
+		LONG width = (client.right - client.left)  / getWidth();
+		LONG height = (client.bottom - client.top) / getHeight();
+
+		RECT cell;
+		for (int i = 0, imax = getHeight(); i < imax; ++i) {
+			cell.top = i * height;
+			cell.bottom = cell.top + height;
+
+			uint8_t line = *const_cast<TestScreen *>(this)->getLine(i);
+			for (int j = 0, jmax = getWidth(); j < jmax; ++j) {
+				cell.left = j * width;
+				cell.right = cell.left + width;
+
+				SetDCBrushColor(hDc, !!((line << j) & 0x80) ?
+					COLOR_LED_ON : COLOR_LED_OFF);
+
+				Ellipse(hDc, cell.left + AA_(5), cell.top + AA_(5),
+					cell.right - AA_(5), cell.bottom - AA_(5));
+			}
+		}
+	}
+};
+
+typedef _2d::Scene<uint8_t, uint8_t> TestScene;
+
+
+static TestScreen screen;
+static TestScene  scene(screen.getWidth(), screen.getHeight());
+
+static asr::Sprite smiley(8, 8);
+
+static void RenderWorld(HWND hWnd) {
+	scene.renderTo(screen);
+
+	if (!!hWnd) {
+		InvalidateRect(hWnd, NULL, FALSE);
+	}
+}
+
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -189,8 +254,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_CREATE:
+	{
 		hDc = CreateCompatibleDC(GetDC(NULL));
+
+		uint8_t *spriteData;
+
+		spriteData = smiley.getValueAt(0); // 0, 36, 36, 36, 0, 102, 60, 0
+		spriteData[0] = 0x00;
+		spriteData[1] = 0x24;
+		spriteData[2] = 0x24;
+		spriteData[3] = 0x24;
+		spriteData[4] = 0x00;
+		spriteData[5] = 0x66;
+		spriteData[6] = 0x3c;
+		spriteData[7] = 0x00;
+
+		scene.add(smiley);
+
+		RenderWorld(NULL);
 		break;
+	}
 	case WM_SIZE:
 		CreateOutputBitmap(GetDC(NULL), hDc, LOWORD(lParam), HIWORD(lParam), AA_RANK);
 		break;
@@ -205,26 +288,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (!!dcBrush && GetClientRectAntialias(hWnd, &client, AA_RANK)) {
 			SelectObject(hDc, dcBrush);
 
-			LONG width  = (client.right - client.left) / (sizeof(*screen) << 3);
-			LONG height = (client.bottom - client.top) / _countof(screen);
-
-			RECT cell;
-			for (int i = 0; i < _countof(screen); ++i) {
-				cell.top = i * height;
-				cell.bottom = cell.top + height;
-
-				BYTE line = screen[i];
-				for (int j = 0; j < (sizeof(*screen) << 3); ++j) {
-					cell.left = j * width;
-					cell.right = cell.left + width;
-
-					SetDCBrushColor(hDc, !!((line << j) & 0x80) ? 
-						COLOR_LED_ON : COLOR_LED_OFF);
-
-					Ellipse(hDc, cell.left + 40, cell.top + 40,
-						cell.right - 40, cell.bottom - 40);
-				}
-			}
+			screen.display(hDc, client, AA_RANK);
 			CommitOutputBitmap(hDc, hDcWindow, 
 				client.right - client.left, 
 				client.bottom - client.top,
@@ -234,6 +298,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 		break;
 	}
+	case WM_KEYDOWN:
+		switch (wParam) {
+		case VK_LEFT:
+			smiley.MoveBy(-1, 0);
+			RenderWorld(hWnd);
+			break;
+
+		case VK_RIGHT:
+			smiley.MoveBy(1, 0);
+			RenderWorld(hWnd);
+			break;
+
+		case VK_UP:
+			smiley.MoveBy(0, -1);
+			RenderWorld(hWnd);
+			break;
+
+		case VK_DOWN:
+			smiley.MoveBy(0, 1);
+			RenderWorld(hWnd);
+			break;
+		}
+		break;
 	case WM_DESTROY:
 		DeleteOutputBitmap(hDc);
 		DeleteDC(hDc);

@@ -20,12 +20,33 @@ namespace _2d {
 template<typename TUnit, typename TCarrier>
 class Scene : public Object<TUnit> {
 
-	typedef typename std::vector<Sprite<TUnit, TCarrier>*>::iterator sprite_iter;
-
-	std::vector<Sprite<TUnit, TCarrier>*> sprites;
+	typedef const Sprite<TUnit, TCarrier>			*sprite_ptr;
+	typedef std::vector<sprite_ptr>					sprite_vector;
+	typedef typename sprite_vector::const_iterator	sprite_const_iterator;
+	typedef typename sprite_vector::iterator		sprite_iterator;
+	
+	sprite_vector sprites;
 
 
 public:
+
+	using typename Object<TUnit>::unit_t;
+	using typename Object<TUnit>::uunit_t;
+
+	Scene(unit_t x, unit_t y, uunit_t w, uunit_t h)
+		: Object<TUnit>(x, y, w, h) {
+		/* Nothing to do */
+	}
+
+	Scene(uunit_t w, uunit_t h)
+		: Object<TUnit>(w, h) {
+		/* Nothing to do */
+	}
+
+	virtual ~Scene() {
+		/* Nothing to do */
+	}
+
 
 	void add(const Sprite<TUnit, TCarrier> &sprite) {
 		sprites.insert(sprites.end(), &sprite);
@@ -35,16 +56,25 @@ public:
 		sprites.clear();
 	}
 
-	void render(Viewport<TUnit, TCarrier> &viewport) {
-		rect_t<TUnit> rcViewport, rcSprite, rcDrawing;
+	void renderTo(Viewport<TUnit, TCarrier> &viewport) const {
+		point_t<unit_t> origin;
 
+		origin.x = getX();
+		origin.y = getY();
+
+		rect_t<unit_t> rcViewport, rcSprite, rcDrawing;
+
+		viewport.flush();
 		viewport.getBoundingRect(rcViewport);
-		for (sprite_iter i = sprites.begin(), iend = sprites.end(); i != iend; ++i) {
-			(*i)->getBoundingRect(rcSprite);
+		for (sprite_const_iterator sprite_cur = sprites.begin(), 
+			sprite_end = sprites.end(); sprite_cur != sprite_end; ++sprite_cur) {
 
-			offset(rcSprite, getX(), getY());
+			sprite_ptr sprite = *sprite_cur;
+			sprite->getBoundingRect(rcSprite);
+
+			offset(rcSprite, origin.x, origin.y);
 			if (intersect(rcViewport, rcSprite, rcDrawing)) {
-				(*i)->render(viewport, rcDrawing);
+				sprite->render(viewport, rcDrawing, origin);
 			}
 		}
 	}

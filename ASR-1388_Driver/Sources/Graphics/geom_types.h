@@ -11,6 +11,8 @@
 
 #include <cmath>
 
+#ifndef ASR_TEST
+
 inline double round(double x) {
 	if (x != 0) {
 		return x > 0 ? floor(x + .5) : ceil(x - .5);
@@ -24,6 +26,8 @@ inline float round(float x) {
 	}
 	return 0;
 }
+
+#endif /* ifndef ASR_TEST */
 
 
 template <typename TUnit>
@@ -62,7 +66,6 @@ struct rect_t {
 	TUnit top;
 	TUnit right;
 	TUnit bottom;
-
 
 	operator point_t<TUnit>() const {
 		point_t<TUnit> pt;
@@ -103,7 +106,7 @@ bool intersect(const rect_t<TUnit> &a, const rect_t<TUnit> &b, rect_t<TUnit> &in
 	intersection.bottom = min(ba, bb);
 
 	return (intersection.left < intersection.right
-			|| intersection.top < intersection.right);
+			&& intersection.top < intersection.right);
 }
 
 template <typename TUnitRect, typename TUnitPoint>

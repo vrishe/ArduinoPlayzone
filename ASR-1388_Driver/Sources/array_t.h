@@ -106,6 +106,11 @@ public:
 	}
 };
 
+template<typename TCarrier, uint8_t dims>
+array_base<TCarrier, dims>::~array_base() {
+	/* Nothing to do */
+}
+
 
 template<typename TCarrier, uint8_t dims>
 class array_trait<TCarrier, dims, true> : public array_base<TCarrier, dims> {

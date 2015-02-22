@@ -57,7 +57,7 @@ public:
 		this->Object<uunit_t>::getBoundingRect(rect);
 
 		unsigned test = abs((int)(rotation - rotation / 360));
-		if (test != 0 || test != 180) {
+		if (test != 0 && test != 180) {
 			if (test == 90) {
 				unit_t temp;
 
@@ -72,19 +72,20 @@ public:
 				return;
 			}
 			const double c = cos(rotation);
-			const double s = sin(rotation);
 
 			point_t<float> center;
 			getRectCenter(rect, center);
 
 			rect.left  	= (unit_t)round((rect.left   - center.x) * c + center.x);
 			rect.right 	= (unit_t)round((rect.right  - center.x) * c + center.x);
-			rect.top   	= (unit_t)round((rect.top    - center.y) * s + center.y);
-			rect.bottom = (unit_t)round((rect.bottom - center.y) * s + center.y);
+			rect.top   	= (unit_t)round((rect.top    - center.y) * c + center.y);
+			rect.bottom = (unit_t)round((rect.bottom - center.y) * c + center.y);
 		}
 	}
 
-	virtual ~Sprite() = 0;
+	virtual ~Sprite() {
+		/* Nothing to do */
+	}
 	virtual void render(Viewport<uunit_t, TCarrier> &viewport,
 			const rect_t<unit_t> &rect, const point_t<unit_t> &origin) const = 0;
 };
