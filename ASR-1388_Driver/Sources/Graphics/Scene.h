@@ -46,6 +46,10 @@ public:
 		/* Nothing to do */
 	}
 
+	Scene() : Object<TUnit>(0, 0, 0, 0) {
+		/* Nothing to do */
+	}
+
 	virtual ~Scene() {
 		/* Nothing to do */
 	}

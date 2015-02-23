@@ -36,11 +36,11 @@ public:
 	uunit_t getWidth () const { return w; }
 	uunit_t getHeight() const { return h; }
 
-	void MoveTo(unit_t ax, unit_t ay) {
+	void moveTo(unit_t ax, unit_t ay) {
 		x = ax;
 		y = ay;
 	}
-	void MoveBy(unit_t dx, unit_t dy) {
+	void moveBy(unit_t dx, unit_t dy) {
 		x += dx;
 		y += dy;
 	}
