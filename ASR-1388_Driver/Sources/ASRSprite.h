@@ -32,6 +32,7 @@ public:
 	Sprite(uunit_t w, uunit_t h)
 		: matrix_t<uint8_t>(h, ELEMENT_SIZE(w, uunit_t), 1),
 			_2d::Sprite<uint8_t, uint8_t>(w, h) {
+
 		/* Nothing to do */
 	}
 
@@ -43,6 +44,7 @@ public:
 	virtual void render(_2d::Viewport<uunit_t, uint8_t> &viewport,
 			const _2d::rect_t<unit_t> &rect, const _2d::point_t<unit_t> &origin) const;
 };
+
 
 } /* namespace asr */
 

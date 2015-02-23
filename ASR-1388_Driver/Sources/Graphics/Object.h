@@ -28,32 +28,6 @@ public:
 	typedef TUnit uunit_t;
 
 
-private:
-
-	unit_t  x, y;
-	uunit_t w, h;
-
-	void Initialize(unit_t x, unit_t y, uunit_t w, uunit_t h) {
-		this->x = x;
-		this->y = y;
-		this->w = w;
-		this->h = h;
-	}
-
-
-protected:
-
-	ObjectBase(unit_t x, unit_t y, uunit_t w, uunit_t h) {
-		Initialize(x, y, w, h);
-	}
-
-	ObjectBase(uunit_t w, uunit_t h) {
-		Initialize(0, 0, w, h);
-	}
-
-
-public:
-
 	virtual ~ObjectBase() = 0;
 
 	unit_t getX() const { return x; }
@@ -77,6 +51,30 @@ public:
 		rect.top 	= y;
 		rect.right 	= x + w;
 		rect.bottom = y + h;
+	}
+
+
+protected:
+
+	ObjectBase(unit_t x, unit_t y, uunit_t w, uunit_t h) {
+		Initialize(x, y, w, h);
+	}
+
+	ObjectBase(uunit_t w, uunit_t h) {
+		Initialize(0, 0, w, h);
+	}
+
+
+private:
+
+	unit_t  x, y;
+	uunit_t w, h;
+
+	void Initialize(unit_t x, unit_t y, uunit_t w, uunit_t h) {
+		this->x = x;
+		this->y = y;
+		this->w = w;
+		this->h = h;
 	}
 };
 

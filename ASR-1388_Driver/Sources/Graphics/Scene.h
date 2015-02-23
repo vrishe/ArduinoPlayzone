@@ -33,13 +33,16 @@ public:
 	using typename Object<TUnit>::unit_t;
 	using typename Object<TUnit>::uunit_t;
 
+
 	Scene(unit_t x, unit_t y, uunit_t w, uunit_t h)
 		: Object<TUnit>(x, y, w, h) {
+
 		/* Nothing to do */
 	}
 
 	Scene(uunit_t w, uunit_t h)
 		: Object<TUnit>(w, h) {
+
 		/* Nothing to do */
 	}
 
@@ -59,12 +62,11 @@ public:
 	void renderTo(Viewport<TUnit, TCarrier> &viewport) const {
 		point_t<unit_t> origin;
 
-		origin.x = getX();
-		origin.y = getY();
+		origin.x = this->Object<TUnit>::getX();
+		origin.y = this->Object<TUnit>::getY();
 
 		rect_t<unit_t> rcViewport, rcSprite, rcDrawing;
 
-		viewport.flush();
 		viewport.getBoundingRect(rcViewport);
 		for (sprite_const_iterator sprite_cur = sprites.begin(), 
 			sprite_end = sprites.end(); sprite_cur != sprite_end; ++sprite_cur) {

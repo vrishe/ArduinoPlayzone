@@ -43,6 +43,8 @@ protected:
 
 public:
 
+#ifdef GRAPHICS_FULL
+
 	float getRotation() const { return rotation; }
 
 	void rotateTo(float angle) {
@@ -82,6 +84,8 @@ public:
 			rect.bottom = (unit_t)round((rect.bottom - center.y) * c + center.y);
 		}
 	}
+
+#endif /* ifdef GRAPHICS_FULL */
 
 	virtual ~Sprite() {
 		/* Nothing to do */

@@ -9,6 +9,15 @@
 #define SOURCES_GRAPHICS_GEOM_TYPES_H_
 
 
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef max
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#endif
+
+
 #include <cmath>
 
 #ifndef ASR_TEST
@@ -106,7 +115,7 @@ bool intersect(const rect_t<TUnit> &a, const rect_t<TUnit> &b, rect_t<TUnit> &in
 	intersection.bottom = min(ba, bb);
 
 	return (intersection.left < intersection.right
-			&& intersection.top < intersection.right);
+			&& intersection.top < intersection.bottom);
 }
 
 template <typename TUnitRect, typename TUnitPoint>

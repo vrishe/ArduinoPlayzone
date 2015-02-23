@@ -20,7 +20,7 @@ void Screen::init(uint8_t pinClock, uint8_t pinLatch, uint8_t pinData) {
 void Screen::display() const {
 	for (int8_t r = 0, rmax = getHeight(); r < rmax; ++r) {
 
-		uint16_t line = (data[r] << 8 | ((uint16_t)_BV(r)));
+		uint16_t line = (~data[r] << 8 | ((uint16_t)_BV(r)));
 
 		digitalWrite(pinLatch, LOW);
 		digitalWrite(pinData, LOW);

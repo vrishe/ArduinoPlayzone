@@ -26,6 +26,7 @@ public:
 	using typename Viewport<TUnit, TCarrier>::unit_t;
 	using typename Viewport<TUnit, TCarrier>::uunit_t;
 
+
 	ScreenBase() : Viewport<TUnit, TCarrier>(0, 0, width, height) {
 		/* Nothing to do */
 	}
@@ -33,6 +34,8 @@ public:
 	virtual ~ScreenBase() {
 		/* Nothing to do */
 	}
+
+
 	virtual TViewport getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) const = 0;
 };
 
@@ -42,6 +45,12 @@ class Screen : public ScreenBase<TUnit, TCarrier, TViewport, width, height,
 	true/*std::is_base_of<Viewport<TUnit, TCarrier>, TViewport>::value*/> {
 
 public:
+
+	using typename ScreenBase<TUnit, TCarrier, TViewport, width, height,
+			true/*std::is_base_of<Viewport<TUnit, TCarrier>, TViewport>::value*/>::unit_t;
+	using typename ScreenBase<TUnit, TCarrier, TViewport, width, height,
+			true/*std::is_base_of<Viewport<TUnit, TCarrier>, TViewport>::value*/>::uunit_t;
+
 
 	Screen() : ScreenBase<TUnit, TCarrier, TViewport, width, height,
 		true/*std::is_base_of<Viewport<TUnit, TCarrier>, TViewport>::value*/>() {

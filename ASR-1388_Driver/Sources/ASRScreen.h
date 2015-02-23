@@ -10,6 +10,7 @@
 
 
 #include "Graphics/Screen.h"
+#include "Graphics/Scene.h"
 
 #include <stdint.h>
 
@@ -22,16 +23,12 @@ class Screen : public _2d::Screen<uint8_t, uint8_t, Screen, 8, 8>  {
 	uint32_t pinData;
 
 #ifdef DEBUG
-	volatile unsigned long scanLineDelay;
+	volatile unsigned long scanLineDelay = 0;
 #endif
 
 	uint8_t data[8];
 
 public:
-
-	using typename _2d::Screen<uint8_t, uint8_t, Screen, 8, 8>::unit_t;
-	using typename _2d::Screen<uint8_t, uint8_t, Screen, 8, 8>::uunit_t;
-
 
 #ifdef DEBUG
 	void setScanLineDelay(unsigned long scanLineDelay) {
@@ -51,8 +48,16 @@ public:
 	void display() const;
 
 	virtual uunit_t *getLine(uunit_t lineIndex);
+
+	virtual void flush() {
+		memset(data, 0x00, sizeof(data));
+	}
+
+
 	virtual Screen getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) const;
 };
+
+typedef _2d::Scene<uint8_t, uint8_t> Scene;
 
 
 } /* namespace asr */

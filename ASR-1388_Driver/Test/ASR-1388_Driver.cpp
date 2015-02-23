@@ -230,12 +230,63 @@ static TestScene  scene(screen.getWidth(), screen.getHeight());
 static asr::Sprite smiley(8, 8);
 
 static void RenderWorld(HWND hWnd) {
+	screen.flush();
 	scene.renderTo(screen);
 
 	if (!!hWnd) {
 		InvalidateRect(hWnd, NULL, FALSE);
 	}
 }
+
+
+BOOL WriteABuffer(HANDLE hComm, char * lpBuf, DWORD dwToWrite)
+{
+	OVERLAPPED osWrite = { 0 };
+	DWORD dwWritten;
+	DWORD dwRes;
+	BOOL fRes;
+
+	// Create this write operation's OVERLAPPED structure's hEvent.
+	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (osWrite.hEvent == NULL)
+		// error creating overlapped event handle
+		return FALSE;
+
+	// Issue write.
+	if (!WriteFile(hComm, lpBuf, dwToWrite, &dwWritten, &osWrite)) {
+		if (GetLastError() != ERROR_IO_PENDING) {
+			// WriteFile failed, but isn't delayed. Report error and abort.
+			fRes = FALSE;
+		} else {
+			// Write is pending.
+			dwRes = WaitForSingleObject(osWrite.hEvent, INFINITE);
+		}
+		switch (dwRes)
+		{
+			// OVERLAPPED structure's event has been signaled. 
+		case WAIT_OBJECT_0:
+			if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, FALSE))
+				fRes = FALSE;
+			else
+				// Write operation completed successfully.
+				fRes = TRUE;
+			break;
+
+		default:
+			// An error has occurred in WaitForSingleObject.
+			// This usually indicates a problem with the
+			// OVERLAPPED structure's event handle.
+			fRes = FALSE;
+			break;
+		}
+	} else {
+		// WriteFile completed immediately.
+		fRes = TRUE;
+	}
+	CloseHandle(osWrite.hEvent);
+	return fRes;
+}
+
 
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -250,13 +301,26 @@ static void RenderWorld(HWND hWnd) {
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static HDC hDc;
+	static HANDLE hCom;
 
 	switch (message)
 	{
 	case WM_CREATE:
 	{
 		hDc = CreateCompatibleDC(GetDC(NULL));
+		hCom = CreateFile(_T("COM4"),
+			GENERIC_READ | GENERIC_WRITE,
+			0,
+			0,
+			OPEN_EXISTING,
+			FILE_FLAG_OVERLAPPED,
+			0
+		);
+		if (hCom == INVALID_HANDLE_VALUE) {
+			DestroyWindow(hWnd);
 
+			return -1;
+		}
 		uint8_t *spriteData;
 
 		spriteData = smiley.getValueAt(0); // 0, 36, 36, 36, 0, 102, 60, 0
@@ -301,21 +365,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_KEYDOWN:
 		switch (wParam) {
 		case VK_LEFT:
+			WriteABuffer(hCom, "l", 1);
 			smiley.MoveBy(-1, 0);
 			RenderWorld(hWnd);
 			break;
 
 		case VK_RIGHT:
+			WriteABuffer(hCom, "r", 1);
 			smiley.MoveBy(1, 0);
 			RenderWorld(hWnd);
 			break;
 
 		case VK_UP:
+			WriteABuffer(hCom, "u", 1);
 			smiley.MoveBy(0, -1);
 			RenderWorld(hWnd);
 			break;
 
 		case VK_DOWN:
+			WriteABuffer(hCom, "d", 1);
 			smiley.MoveBy(0, 1);
 			RenderWorld(hWnd);
 			break;
@@ -325,6 +393,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		DeleteOutputBitmap(hDc);
 		DeleteDC(hDc);
 
+		if (hCom != INVALID_HANDLE_VALUE) {
+			CloseHandle(hCom);
+		}
 		PostQuitMessage(0);
 		break;
 	default:
