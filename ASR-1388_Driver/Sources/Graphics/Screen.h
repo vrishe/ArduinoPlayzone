@@ -26,7 +26,7 @@ public:
 	using typename Viewport<TUnit, TCarrier>::unit_t;
 	using typename Viewport<TUnit, TCarrier>::uunit_t;
 
-	typedef TViewport viewport_t;
+	typedef Viewport<TUnit, TCarrier> viewport_t;
 
 
 	ScreenBase() : Viewport<TUnit, TCarrier>(0, 0, width, height) {

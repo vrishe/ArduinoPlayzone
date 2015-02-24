@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClInclude Include="..\Sources\array_t.h" />
     <ClInclude Include="..\Sources\ASRSprite.h" />
+    <ClInclude Include="..\Sources\ASRTextScroller.h" />
     <ClInclude Include="..\Sources\bitutility.h" />
     <ClInclude Include="..\Sources\cstdlib_ext.h" />
     <ClInclude Include="..\Sources\Graphics\geom_types.h" />
@@ -93,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Sources\ASRSprite.cpp" />
+    <ClCompile Include="..\Sources\ASRTextScroller.cpp" />
     <ClCompile Include="..\Sources\bitutility.cpp" />
     <ClCompile Include="ASR-1388_Driver.cpp" />
     <ClCompile Include="stdafx.cpp">

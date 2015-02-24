@@ -9,6 +9,7 @@
 #define SOURCES_ASRTEXTSCROLLER_H_
 
 
+#include "Graphics/Viewport.h"
 #include "ASRScreen.h"
 #include "ASRSprite.h"
 
@@ -21,22 +22,28 @@ enum TextDirection {
 
 class TextScroller : Scene {
 
-	Screen::viewport_t * const viewport;
+	_2d::Viewport<uint8_t, uint8_t> * const viewport;
 
 	uint8_t delay;
 	uunit_t lineWidth;
 	unit_t  direction;
-	unit_t  ticksPassed;
+
+	unit_t  startingPoint;
+	uunit_t phaseShift;
+	
+	unsigned long ticksPassed;
 
 
 public:
 
-	TextScroller(Screen::viewport_t *viewport)
+	TextScroller(_2d::Viewport<uint8_t, uint8_t> *viewport)
 		: Scene(), viewport(viewport) {
 
 		this->delay = 0xff;
 		this->lineWidth = 0;
 		this->direction = 0;
+		this->startingPoint = 0;
+		this->phaseShift = 0;
 		this->ticksPassed = 0;
 	}
 
@@ -45,13 +52,41 @@ public:
 	}
 
 
+	unit_t getRow() {
+		return getY();
+	}
+
+	void placeAtRow(unit_t row) {
+		this->moveTo(getX(), row);
+	}
+
+	void offsetByRow(unit_t row) {
+		this->moveBy(0, row);
+	}
+
+
+	uint8_t getDelay() const {
+		return delay;
+	}
+
+	void setDelay(uint8_t delay) {
+		this->delay = delay;
+	}
+
+
 	uunit_t getLineWidth() {
 		return lineWidth;
 	}
 
+	template <size_t length>
+	uunit_t setText(const char (&text)[length], uunit_t phaseBias, uunit_t whitespaceWidth,
+			const Sprite * const font[], uunit_t maxCodePoints, unit_t codePointOffset, TextDirection textDirection) {
 
-	uunit_t setText(const char *text, uunit_t length, const Sprite * const font[],
-			uunit_t maxCodePoints, unit_t codePointOffset, TextDirection textDirection);
+		return setText(text, length, phaseBias, whitespaceWidth, font, maxCodePoints, codePointOffset, textDirection);
+	}
+
+	uunit_t setText(const char *text, uunit_t length, uunit_t phaseBias, uunit_t whitespaceWidth,
+		const Sprite * const font[], uunit_t maxCodePoints, unit_t codePointOffset, TextDirection textDirection);
 
 	void updateText(unsigned long ticksCurrent);
 };

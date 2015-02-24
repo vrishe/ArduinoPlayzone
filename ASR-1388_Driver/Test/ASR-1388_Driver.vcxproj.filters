@@ -66,6 +66,9 @@
     <ClInclude Include="..\Sources\bitutility.h">
       <Filter>Header Files\Arduino</Filter>
     </ClInclude>
+    <ClInclude Include="..\Sources\ASRTextScroller.h">
+      <Filter>Header Files\Arduino</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -78,6 +81,9 @@
       <Filter>Source Files\Arduino</Filter>
     </ClCompile>
     <ClCompile Include="..\Sources\bitutility.cpp">
+      <Filter>Source Files\Arduino</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\ASRTextScroller.cpp">
       <Filter>Source Files\Arduino</Filter>
     </ClCompile>
   </ItemGroup>

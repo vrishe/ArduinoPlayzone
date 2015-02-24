@@ -35,12 +35,6 @@ protected:
 		this->elementSize = 0;
 		this->data = NULL;
 	}
-	array_base(const array_base &source) {
-		this->data = source.data;
-		this->elementSize = source.elementSize;
-
-		memcpy(this->dimensions, dimensions, sizeof(dimensions));
-	}
 
 
 	void getValueAt(size_t valueIndex, TCarrier *dataOut) const {
@@ -146,7 +140,7 @@ template<typename TCarrier>
 class array_trait <TCarrier, 2, true> : public array_base<TCarrier, 2> {
 
 	void initialize(uint16_t rows, uint16_t cols, uint8_t elementSize) {
-		size_t volume = elementSize * this->dimensions[0] * this->dimensions[1];
+		size_t volume = elementSize * cols * rows;
 
 		this->dimensions[0] = cols;
 		this->dimensions[1] = rows;

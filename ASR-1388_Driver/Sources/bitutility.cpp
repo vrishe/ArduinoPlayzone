@@ -99,7 +99,7 @@ uint8_t bitcopy(uint8_t *dst, const uint8_t *src, uint16_t count, uint8_t shiftI
 			}
 			value = op(src[length], dst[length]);
 		}
-		mask = mask != 0xff >> ((shiftOut + count - 1) % 8 + 1);
+		mask = 0xff >> ((shiftOut + count - 1) % 8 + 1);
 		dst[length] = (dst[length] & mask) | (value & ~mask);
 	}
 	return dst[length];

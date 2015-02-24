@@ -13,49 +13,60 @@
 
 namespace asr {
 
-TextScroller::uunit_t TextScroller::setText(const char *text, uunit_t length,
+	TextScroller::uunit_t TextScroller::setText(const char *text, uunit_t length, uunit_t phaseBias, uunit_t whitespaceWidth,
 		const Sprite * const font[], uunit_t maxCodePoints, unit_t codePointOffset, TextDirection textDirection) {
 
 	clear();
 
 	lineWidth = 0;
 	if (text != NULL && length > 0) {
+		if (whitespaceWidth < 1) {
+			whitespaceWidth = 1;
+		}
 		for (uunit_t i = 0; i < length; ++i, ++text) {
 			const char character = *text - codePointOffset;
 
-			if (character < maxCodePoints) {
-				const Sprite *unit = font[(size_t)character];
+			const Sprite *unit;
+			if (character < maxCodePoints
+				&& (unit = font[(size_t)character]) != NULL) {
+
+				asr::Sprite *unitCopy = new asr::Sprite(*unit);
+				unitCopy->moveTo(lineWidth, unitCopy->getY());
+				add(*unitCopy);
 
 				lineWidth += unit->getWidth();
-				add(*unit);
 			} else {
-				lineWidth += bitsizeof(uunit_t);
+				lineWidth += whitespaceWidth;
 			}
 		}
 		switch(textDirection) {
 		case LeftToRight:
-			moveTo(-viewport->getWidth(), getY());
-			direction = +1;
+			startingPoint = viewport->getWidth();
+			direction = -1;
 			break;
 		case RightToLeft:
-			moveTo(lineWidth + viewport->getWidth(), getY());
-			direction = -1;
+			startingPoint = -lineWidth - viewport->getWidth();
+			direction = +1;
 		}
+		phaseShift = lineWidth + viewport->getWidth() + phaseBias;
 		ticksPassed = 0;
+
+		moveTo(startingPoint, y);
 	}
 	return lineWidth;
 }
 
 void TextScroller::updateText(unsigned long ticksCurrent) {
-	unit_t offset;
+	unit_t offset = direction * ((ticksCurrent - ticksPassed) / delay);
 
-	if (ticksPassed > 0 && (offset = direction * ((ticksCurrent - ticksPassed) / delay)) > 0) {
-		moveBy(offset, 0);
-
+	if (ticksPassed == 0 || offset != 0) {	
 		viewport->flush();
+
+		moveTo(startingPoint + (x - startingPoint) % phaseShift + offset, y);
 		renderTo(*viewport);
+
+		ticksPassed = ticksCurrent;
 	}
-	ticksPassed = ticksCurrent;
 }
 
 } /* namespace asr */

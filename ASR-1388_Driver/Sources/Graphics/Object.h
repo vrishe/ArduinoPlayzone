@@ -56,6 +56,10 @@ public:
 
 protected:
 
+	unit_t  x, y;
+	uunit_t w, h;
+
+
 	ObjectBase(unit_t x, unit_t y, uunit_t w, uunit_t h) {
 		Initialize(x, y, w, h);
 	}
@@ -66,9 +70,6 @@ protected:
 
 
 private:
-
-	unit_t  x, y;
-	uunit_t w, h;
 
 	void Initialize(unit_t x, unit_t y, uunit_t w, uunit_t h) {
 		this->x = x;
