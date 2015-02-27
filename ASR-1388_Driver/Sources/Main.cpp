@@ -34,9 +34,9 @@ static void toggleSlowDown() {
 #endif
 
 
-static asr::Scene  scene	(8, 8);
+//static asr::Scene  scene	(8, 8);
 //static asr::Sprite smiley	(8, 8);
-
+//
 //static void initScene() {
 //
 //	uint8_t *spriteData;
@@ -138,24 +138,24 @@ static void initTextScroller() {
 
 
 	const char text[] = "HELLO WORLD";
-	textScroller.setText(text, _countof(text) - 1, 0, 5, font, _countof(font), 'D', asr::LeftToRight);
+
+	textScroller.setText(text, _countof(text) - 1, 0, font, _countof(font), 'D', 5, asr::LeftToRight);
 	textScroller.placeAtRow(2);
-	textScroller.setDelay(64);
+	textScroller.setDelay(56);
 }
 
 
 void setup() {
 	screen.init(PIN_CLOCK, PIN_LATCH, PIN_DATA);
 
+//  Serial.begin(57600);
+//	initScene();
 	initTextScroller();
-
 
 #ifdef DEBUG
 	pinMode(3, INPUT_PULLUP);
 	attachInterrupt(1, toggleSlowDown, RISING);
 #endif
-
-//	Serial.begin(57600);
 }
 
 
@@ -165,19 +165,19 @@ void loop() {
 //	while (Serial.available()) {
 //		switch (Serial.read()) {
 //		case 'l':
-//			smiley.MoveBy(-1, 0);
+//			smiley.moveBy(-1, 0);
 //			refresh = true;
 //			break;
 //		case 'u':
-//			smiley.MoveBy(0, -1);
+//			smiley.moveBy(0, -1);
 //			refresh = true;
 //			break;
 //		case 'r':
-//			smiley.MoveBy(1, 0);
+//			smiley.moveBy(1, 0);
 //			refresh = true;
 //			break;
 //		case 'd':
-//			smiley.MoveBy(0, 1);
+//			smiley.moveBy(0, 1);
 //			refresh = true;
 //			break;
 //		}

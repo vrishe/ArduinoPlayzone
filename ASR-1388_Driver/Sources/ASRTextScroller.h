@@ -79,14 +79,14 @@ public:
 	}
 
 	template <size_t length>
-	uunit_t setText(const char (&text)[length], uunit_t phaseBias, uunit_t whitespaceWidth,
-			const Sprite * const font[], uunit_t maxCodePoints, unit_t codePointOffset, TextDirection textDirection) {
+	uunit_t setText(const char (&text)[length], uunit_t phaseBias, const Sprite * const font[],
+			uunit_t maxCodePoints, unit_t codePointOffset, uunit_t whitespaceWidth, TextDirection textDirection) {
 
-		return setText(text, length, phaseBias, whitespaceWidth, font, maxCodePoints, codePointOffset, textDirection);
+		return setText(text, length, phaseBias, font, maxCodePoints, codePointOffset, whitespaceWidth, textDirection);
 	}
 
-	uunit_t setText(const char *text, uunit_t length, uunit_t phaseBias, uunit_t whitespaceWidth,
-		const Sprite * const font[], uunit_t maxCodePoints, unit_t codePointOffset, TextDirection textDirection);
+	uunit_t setText(const char *text, uunit_t length, uunit_t phaseBias, const Sprite * const font[],
+			uunit_t maxCodePoints, unit_t codePointOffset, uunit_t whitespaceWidth, TextDirection textDirection);
 
 	void updateText(unsigned long ticksCurrent);
 };

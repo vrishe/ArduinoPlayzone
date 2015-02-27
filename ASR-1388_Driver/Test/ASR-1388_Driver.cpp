@@ -222,36 +222,34 @@ public:
 	}
 };
 
-typedef _2d::Scene<uint8_t, uint8_t> TestScene;
-
 
 static TestScreen screen;
-static TestScene  scene;
 
-//static asr::Sprite smiley(8, 8);
-//
-//static void initScene() {
-//
-//	uint8_t *spriteData;
-//
-//	spriteData = smiley.getValueAt(0);
-//	spriteData[0] = 0x00;
-//	spriteData[1] = 0x24;
-//	spriteData[2] = 0x24;
-//	spriteData[3] = 0x24;
-//	spriteData[4] = 0x00;
-//	spriteData[5] = 0x66;
-//	spriteData[6] = 0x3c;
-//	spriteData[7] = 0x00;
-//
-//	scene.add(smiley);
-//}
+// typedef _2d::Scene<uint8_t, uint8_t> TestScene;
+// static TestScene  scene;
+// static asr::Sprite smiley(8, 8);
+
+// static void initScene() {
+
+// 	uint8_t *spriteData;
+
+// 	spriteData = smiley.getValueAt(0);
+// 	spriteData[0] = 0x00;
+// 	spriteData[1] = 0x24;
+// 	spriteData[2] = 0x24;
+// 	spriteData[3] = 0x24;
+// 	spriteData[4] = 0x00;
+// 	spriteData[5] = 0x66;
+// 	spriteData[6] = 0x3c;
+// 	spriteData[7] = 0x00;
+
+// 	scene.add(smiley);
+// }
+
 
 static unsigned long ticks;
 static asr::TextScroller textScroller(&screen);
 static asr::Sprite *font[20] = { /* zero */ };
-static char fontIndex[10];
-static size_t currentCodePoint = 0;
 
 static void initTextScroller() {
 	uint8_t *spriteData;
@@ -406,30 +404,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 	{
 		hDc = CreateCompatibleDC(GetDC(NULL));
-		hCom = CreateFile(_T("COM4"),
-			GENERIC_READ | GENERIC_WRITE,
-			0,
-			0,
-			OPEN_EXISTING,
-			FILE_FLAG_OVERLAPPED,
-			0
-		);
-		//if (hCom == INVALID_HANDLE_VALUE) {
-		//	DestroyWindow(hWnd);
+		// hCom = CreateFile(_T("COM4"),
+		// 	GENERIC_READ | GENERIC_WRITE,
+		// 	0,
+		// 	0,
+		// 	OPEN_EXISTING,
+		// 	FILE_FLAG_OVERLAPPED,
+		// 	0
+		// );
+		// if (hCom == INVALID_HANDLE_VALUE) {
+		// 	DestroyWindow(hWnd);
 
-		//	return -1;
-		//}
-		//uint8_t *spriteData;
-
-		//spriteData = smiley.getValueAt(0); // 0, 36, 36, 36, 0, 102, 60, 0
-		//spriteData[0] = 0x00;
-		//spriteData[1] = 0x24;
-		//spriteData[2] = 0x24;
-		//spriteData[3] = 0x24;
-		//spriteData[4] = 0x00;
-		//spriteData[5] = 0x66;
-		//spriteData[6] = 0x3c;
-		//spriteData[7] = 0x00;
+		// 	return -1;
+		// }
+		//initScene();
 
 		initTextScroller();
 
@@ -462,33 +450,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_KEYDOWN:
 		switch (wParam) {
-	//	case VK_LEFT:
-	//		WriteABuffer(hCom, "l", 1);
-	//		smiley.moveBy(-1, 0);
-	//		RenderWorld(hWnd);
-	//		break;
+		// case VK_LEFT:
+		// 	WriteABuffer(hCom, "l", 1);
+		// 	smiley.moveBy(-1, 0);
+		// 	RenderWorld(hWnd);
+		// 	break;
 
-	//	case VK_RIGHT:
-	//		WriteABuffer(hCom, "r", 1);
-	//		smiley.moveBy(1, 0);
-	//		RenderWorld(hWnd);
-	//		break;
+		// case VK_RIGHT:
+		// 	WriteABuffer(hCom, "r", 1);
+		// 	smiley.moveBy(1, 0);
+		// 	RenderWorld(hWnd);
+		// 	break;
 
-	//	case VK_UP:
-	//		WriteABuffer(hCom, "u", 1);
-	//		smiley.moveBy(0, -1);
-	//		RenderWorld(hWnd);
-	//		break;
+		// case VK_UP:
+		// 	WriteABuffer(hCom, "u", 1);
+		// 	smiley.moveBy(0, -1);
+		// 	RenderWorld(hWnd);
+		// 	break;
 
-	//	case VK_DOWN:
-	//		WriteABuffer(hCom, "d", 1);
-	//		smiley.moveBy(0, 1);
-	//		RenderWorld(hWnd);
-	//		break;
+		// case VK_DOWN:
+		// 	WriteABuffer(hCom, "d", 1);
+		// 	smiley.moveBy(0, 1);
+		// 	RenderWorld(hWnd);
+		// 	break;
 		case VK_SPACE:
-			//scene.clear();
-			//scene.add(*font[fontIndex[currentCodePoint] - 'D']);
-			//currentCodePoint = (currentCodePoint + 1) % _countof(fontIndex);
 			textScroller.updateText(ticks += 127);
 
 			InvalidateRect(hWnd, NULL, FALSE);
