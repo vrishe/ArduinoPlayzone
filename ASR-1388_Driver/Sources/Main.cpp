@@ -5,18 +5,16 @@
  *      Author: Admin
  */
 
-
-#include "ASRScreen.h"
-#include "ASRSprite.h"
-#include "ASRTextScroller.h"
-#include "cstdlib_ext.h"
-
 #include <Arduino.h>
+#include "cstdlib_ext.h"
 
 
 #define PIN_CLOCK 	13
 #define PIN_LATCH 	12
 #define PIN_DATA	 4
+
+
+#include "ASRScreen.h"
 
 static asr::Screen screen;
 
@@ -34,6 +32,8 @@ static void toggleSlowDown() {
 #endif
 
 
+//#include "ASRSprite.h"
+//
 //static asr::Scene  scene	(8, 8);
 //static asr::Sprite smiley	(8, 8);
 //
@@ -54,101 +54,29 @@ static void toggleSlowDown() {
 //	scene.add(smiley);
 //}
 
-static asr::TextScroller textScroller(&screen);
-static asr::Sprite *font[20] = { /* zero */ };
+
+#include "ASRFontASCII.h"
+#include "ASRTextScroller.h"
+
+static asr::TextHScroller textScroller(&screen);
 
 static void initTextScroller() {
-	uint8_t *spriteData;
-
-	if ((font[0] = new (std::nothrow) asr::Sprite(5, 5)) == NULL)
-		return;
-
-	spriteData = font[0]->getValueAt(0); // D
-	spriteData[0] = 0xe0;
-	spriteData[1] = 0x90;
-	spriteData[2] = 0x90;
-	spriteData[3] = 0x90;
-	spriteData[4] = 0xe0;
-
-
-	if ((font[1] = new (std::nothrow) asr::Sprite(5, 5)) == NULL)
-		return;
-
-	spriteData = font[1]->getValueAt(0); // E
-	spriteData[0] = 0xf0;
-	spriteData[1] = 0x80;
-	spriteData[2] = 0xe0;
-	spriteData[3] = 0x80;
-	spriteData[4] = 0xf0;
-
-
-	if ((font[4] = new (std::nothrow) asr::Sprite(5, 5)) == NULL)
-		return;
-
-	spriteData = font[4]->getValueAt(0); // H
-	spriteData[0] = 0x90;
-	spriteData[1] = 0x90;
-	spriteData[2] = 0xf0;
-	spriteData[3] = 0x90;
-	spriteData[4] = 0x90;
-
-
-	if ((font[8] = new (std::nothrow) asr::Sprite(5, 5)) == NULL)
-		return;
-
-	spriteData = font[8]->getValueAt(0); // L
-	spriteData[0] = 0x80;
-	spriteData[1] = 0x80;
-	spriteData[2] = 0x80;
-	spriteData[3] = 0x80;
-	spriteData[4] = 0xf0;
-
-
-	if ((font[11] = new (std::nothrow) asr::Sprite(5, 5)) == NULL)
-		return;
-
-	spriteData = font[11]->getValueAt(0); // O
-	spriteData[0] = 0x60;
-	spriteData[1] = 0x90;
-	spriteData[2] = 0x90;
-	spriteData[3] = 0x90;
-	spriteData[4] = 0x60;
-
-
-	if ((font[14] = new (std::nothrow) asr::Sprite(5, 5)) == NULL)
-		return;
-
-	spriteData = font[14]->getValueAt(0); // R
-	spriteData[0] = 0xe0;
-	spriteData[1] = 0x90;
-	spriteData[2] = 0xe0;
-	spriteData[3] = 0x90;
-	spriteData[4] = 0x90;
-
-
-	if ((font[19] = new (std::nothrow) asr::Sprite(6, 5)) == NULL)
-		return;
-
-	spriteData = font[19]->getValueAt(0); // W
-	spriteData[0] = 0x88;
-	spriteData[1] = 0x88;
-	spriteData[2] = 0xa8;
-	spriteData[3] = 0xa8;
-	spriteData[4] = 0x50;
-
-
-	const char text[] = "HELLO WORLD";
-
-	textScroller.setText(text, _countof(text) - 1, 0, font, _countof(font), 'D', 5, asr::LeftToRight);
+//	const char text[] = "HERE ARE SOME TEST";
+//
+//	textScroller.setText(
+//			text, _countof(text) - 1, 0,
+//		asr::FontASCII::Instance, 5,
+//		asr::TextHScroller::LeftToRight
+//	);
 	textScroller.placeAtRow(2);
-	textScroller.setDelay(56);
+	textScroller.setDelay  (56);
 }
 
 
 void setup() {
 	screen.init(PIN_CLOCK, PIN_LATCH, PIN_DATA);
 
-//  Serial.begin(57600);
+	Serial.begin(57600);
 //	initScene();
 	initTextScroller();
 
@@ -158,8 +86,6 @@ void setup() {
 #endif
 }
 
-
-//static bool refresh = true;
 
 void loop() {
 //	while (Serial.available()) {
@@ -188,6 +114,36 @@ void loop() {
 //		screen.flush();
 //		scene.renderTo(screen);
 //	}
-	textScroller.updateText(millis());
+
+	static bool refresh = false;
+
+	while (Serial.available()) {
+		static String buffer;
+
+		auto character = (char)Serial.read();
+
+		if (character == '@') {
+			refresh = (buffer.length() > 0);
+
+			if (refresh) {
+				auto font = &asr::FontASCII::Instance;
+
+				textScroller.setText(buffer.c_str(), (uint8_t)buffer.length(), 0,
+						*font, font->operator [](0)->getWidth(), asr::TextHScroller::LeftToRight);
+
+				buffer.remove(0);
+			} else {
+				textScroller.clear();
+			}
+			break;
+		} else {
+			buffer += character;
+		}
+	}
+	if (refresh) {
+		screen.flush();
+
+		textScroller.updateText(millis());
+	}
 	screen.display();
 }

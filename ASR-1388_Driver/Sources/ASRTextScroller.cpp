@@ -13,7 +13,20 @@
 
 namespace asr {
 
-TextScroller::uunit_t TextScroller::setText(const char *text, uunit_t length, uunit_t phaseBias, const Sprite * const font[],
+TextScrollerBase::~TextScrollerBase() {
+	/* Nothing to do */
+}
+
+
+void TextHScroller::clear() {
+	for (sprite_iterator sprite = sprites.begin(),
+			spriteEnd = sprites.end(); sprite != spriteEnd; ++sprite) {
+		delete *sprite;
+	}
+	Scene::clear();
+}
+
+TextHScroller::uunit_t TextHScroller::setText(const char *text, uunit_t length, uunit_t phaseBias, const Sprite * const font[],
 		uunit_t maxCodePoints, unit_t codePointOffset, uunit_t whitespaceWidth, TextDirection textDirection) {
 
 	clear();
@@ -23,6 +36,8 @@ TextScroller::uunit_t TextScroller::setText(const char *text, uunit_t length, uu
 		if (whitespaceWidth < 1) {
 			whitespaceWidth = 1;
 		}
+		sprites.reserve(length);
+
 		for (uunit_t i = 0; i < length; ++i, ++text) {
 			const unsigned char character = *text - codePointOffset;
 
@@ -39,6 +54,10 @@ TextScroller::uunit_t TextScroller::setText(const char *text, uunit_t length, uu
 				lineWidth += whitespaceWidth;
 			}
 		}
+#if defined(__cplusplus) && __cplusplus >= 201103L
+		sprite_vector(sprites).swap(sprites);
+#endif
+
 		switch(textDirection) {
 		case LeftToRight:
 			startingPoint = viewport->getWidth();
@@ -49,24 +68,25 @@ TextScroller::uunit_t TextScroller::setText(const char *text, uunit_t length, uu
 			direction = +1;
 		}
 		phaseShift = lineWidth + viewport->getWidth() + phaseBias;
-		ticksPassed = 0;
 
 		moveTo(startingPoint, y);
 	}
 	return lineWidth;
 }
 
-void TextScroller::updateText(unsigned long ticksCurrent) {
-	unit_t offset = direction * ((ticksCurrent - ticksPassed) / delay);
+void TextHScroller::updateText(unsigned long ticksCurrent) {
+//	if (!needSync) {
+		unit_t offset = direction * ((ticksCurrent - ticksPassed) / delay);
 
-	if (ticksPassed == 0 || offset != 0) {	
-		viewport->flush();
-
-		moveTo(startingPoint + (x - startingPoint) % phaseShift + offset, y);
-		renderTo(*viewport);
-
-		ticksPassed = ticksCurrent;
-	}
+		if (offset != 0) {
+			moveTo(startingPoint + ((x - startingPoint) % phaseShift) + offset, y);
+			ticksPassed = ticksCurrent;
+		}
+//	} else {
+//		needSync ^= needSync;
+//		ticksPassed = ticksCurrent;
+//	}
+	renderTo(*viewport);
 }
 
 } /* namespace asr */

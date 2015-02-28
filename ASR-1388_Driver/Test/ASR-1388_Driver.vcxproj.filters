@@ -69,6 +69,9 @@
     <ClInclude Include="..\Sources\ASRTextScroller.h">
       <Filter>Header Files\Arduino</Filter>
     </ClInclude>
+    <ClInclude Include="..\Sources\cmath_ext.h">
+      <Filter>Header Files\Arduino</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

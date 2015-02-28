@@ -80,6 +80,7 @@
     <ClInclude Include="..\Sources\ASRSprite.h" />
     <ClInclude Include="..\Sources\ASRTextScroller.h" />
     <ClInclude Include="..\Sources\bitutility.h" />
+    <ClInclude Include="..\Sources\cmath_ext.h" />
     <ClInclude Include="..\Sources\cstdlib_ext.h" />
     <ClInclude Include="..\Sources\Graphics\geom_types.h" />
     <ClInclude Include="..\Sources\Graphics\Object.h" />

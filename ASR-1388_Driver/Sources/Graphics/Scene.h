@@ -20,11 +20,13 @@ namespace _2d {
 template<typename TUnit, typename TCarrier>
 class Scene : public Object<TUnit> {
 
+protected:
+
 	typedef const Sprite<TUnit, TCarrier>			*sprite_ptr;
 	typedef std::vector<sprite_ptr>					sprite_vector;
 	typedef typename sprite_vector::const_iterator	sprite_const_iterator;
 	typedef typename sprite_vector::iterator		sprite_iterator;
-	
+
 	sprite_vector sprites;
 
 
@@ -59,7 +61,7 @@ public:
 		sprites.insert(sprites.end(), &sprite);
 	}
 
-	void clear() {
+	virtual void clear() {
 		sprites.clear();
 	}
 
