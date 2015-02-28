@@ -22,6 +22,13 @@ public:
 	using typename Object<TUnit>::unit_t;
 	using typename Object<TUnit>::uunit_t;
 
+	virtual ~Viewport() {
+		/* Nothing to do */
+	}
+
+
+	virtual TCarrier *getLine(uunit_t lineIndex) = 0;
+	virtual void flush() = 0;
 
 protected:
 
@@ -29,12 +36,6 @@ protected:
 		: Object<TUnit>(x, y, w, h) {
 		/* Nothing to do */
 	}
-
-
-public:
-
-	virtual ~Viewport() = 0;
-	virtual TCarrier *getLine(uunit_t lineIndex) = 0;
 };
 
 

@@ -21,9 +21,6 @@ class array_trait;
 #define NO_DIMENSION		uint16_t(-1)
 #define NO_INDEX			size_t  (-1)
 
-#define ELEMENT_SIZE(bits, type)  \
-	(((((bits) + 7) >> 3) + (sizeof(type) - 1)) / sizeof(type))
-
 template<typename TCarrier, uint8_t dims>
 class array_base {
 
@@ -37,12 +34,6 @@ protected:
 	array_base() {
 		this->elementSize = 0;
 		this->data = NULL;
-	}
-	array_base(const array_base &source) {
-		this->data = source.data;
-		this->elementSize = source.elementSize;
-
-		memcpy(this->dimensions, dimensions, sizeof(dimensions));
 	}
 
 
@@ -109,6 +100,11 @@ public:
 	}
 };
 
+template<typename TCarrier, uint8_t dims>
+array_base<TCarrier, dims>::~array_base() {
+	/* Nothing to do */
+}
+
 
 template<typename TCarrier, uint8_t dims>
 class array_trait<TCarrier, dims, true> : public array_base<TCarrier, dims> {
@@ -144,7 +140,7 @@ template<typename TCarrier>
 class array_trait <TCarrier, 2, true> : public array_base<TCarrier, 2> {
 
 	void initialize(uint16_t rows, uint16_t cols, uint8_t elementSize) {
-		size_t volume = elementSize * this->dimensions[0] * this->dimensions[1];
+		size_t volume = elementSize * cols * rows;
 
 		this->dimensions[0] = cols;
 		this->dimensions[1] = rows;

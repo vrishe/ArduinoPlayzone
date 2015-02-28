@@ -28,35 +28,7 @@ public:
 	typedef TUnit uunit_t;
 
 
-private:
-
-	unit_t  x, y;
-	uunit_t w, h;
-
-	void Initialize(unit_t x, unit_t y, uunit_t w, uunit_t h) {
-		this->x = x;
-		this->y = y;
-		this->w = w;
-		this->h = h;
-	}
-
-
-protected:
-
-	ObjectBase(unit_t x, unit_t y, uunit_t w, uunit_t h) {
-		Initialize(x, y, w, h);
-	}
-
-	ObjectBase(uunit_t w, uunit_t h) {
-		Initialize(0, 0, w, h);
-	}
-
-
-public:
-
-	virtual ~ObjectBase() {
-		/* Nothing to do */
-	}
+	virtual ~ObjectBase() = 0;
 
 	unit_t getX() const { return x; }
 	unit_t getY() const { return y;  }
@@ -64,11 +36,11 @@ public:
 	uunit_t getWidth () const { return w; }
 	uunit_t getHeight() const { return h; }
 
-	void MoveTo(unit_t ax, unit_t ay) {
+	void moveTo(unit_t ax, unit_t ay) {
 		x = ax;
 		y = ay;
 	}
-	void MoveBy(unit_t dx, unit_t dy) {
+	void moveBy(unit_t dx, unit_t dy) {
 		x += dx;
 		y += dy;
 	}
@@ -80,7 +52,37 @@ public:
 		rect.right 	= x + w;
 		rect.bottom = y + h;
 	}
+
+
+protected:
+
+	unit_t  x, y;
+	uunit_t w, h;
+
+
+	ObjectBase(unit_t x, unit_t y, uunit_t w, uunit_t h) {
+		Initialize(x, y, w, h);
+	}
+
+	ObjectBase(uunit_t w, uunit_t h) {
+		Initialize(0, 0, w, h);
+	}
+
+
+private:
+
+	void Initialize(unit_t x, unit_t y, uunit_t w, uunit_t h) {
+		this->x = x;
+		this->y = y;
+		this->w = w;
+		this->h = h;
+	}
 };
+
+template<typename TUnit>
+ObjectBase<TUnit, true>::~ObjectBase() {
+	/* Nothing to do */
+}
 
 template <typename TUnit>
 class Object : public ObjectBase<TUnit, std::is_integral_unsigned<TUnit>::value> {
@@ -99,6 +101,10 @@ public:
 
 	Object(uunit_t w, uunit_t h)
 		: ObjectBase<TUnit, std::is_integral_unsigned<TUnit>::value>(w, h) {
+		/* Nothing to do */
+	}
+
+	virtual ~Object() {
 		/* Nothing to do */
 	}
 };

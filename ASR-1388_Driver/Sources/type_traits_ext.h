@@ -14,17 +14,7 @@
 
 namespace std {
 
-template <bool>
-struct predicate_base : false_type {
-	/* Negative predicate */
-};
-
-template <>
-struct predicate_base<true> : true_type {
-	/* Positive predicate */
-};
-
-
+#ifndef ASR_TEST
 template <typename TInt>
 struct _is_integral_base : false_type {
 	/* not integral type */
@@ -62,6 +52,25 @@ template <typename TInt>
 struct is_integral : _is_integral_base<typename remove_cv<TInt>::type> {
 	/* Determines whether TInt is of integral type */
 };
+
+
+typedef char(&_positive)[1];
+typedef char(&_negative)[2];
+
+template<typename B, typename D>
+struct is_base_of {
+	template<typename T>
+	static _positive check(D*, T);
+	static _negative check(B*, int);
+
+	struct _host {
+		operator B*() const;
+		operator D*();
+	};
+	static const bool value = (sizeof(check(_host(), 0)) == sizeof(_positive));
+};
+
+#endif /* ifndef ASR_TEST */
 
 
 template <typename TInt>

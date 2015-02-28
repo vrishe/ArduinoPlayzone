@@ -18,20 +18,35 @@ namespace {
 
 } /* namespace */
 
-void ASRSprite::render(_2d::Viewport<uunit_t, uint8_t> &viewport, _2d::rect_t<unit_t> &rect) const {
-	unit_t colDst = rect.left - viewport.getX();
-	unit_t colSrc = rect.left - getX();
+void Sprite::render(_2d::Viewport<uunit_t, uint8_t> &viewport,
+		const _2d::rect_t<unit_t> &rect, const _2d::point_t<unit_t> &origin) const {
 
-	uint16_t colDstOffset = ELEMENT_SIZE(colDst, uint8_t) - 1;
-	uint16_t colSrcOffset = ELEMENT_SIZE(rect.left - getX(), uint8_t) - 1;
-	for (unit_t row = rect.top - viewport.getY(), rowmax = rect.bottom - viewport.getY(); row < rowmax; ++row) {
+	uunit_t colDstShift;
+	uunit_t colSrcShift;
+	uint16_t colDstOffset;
+	uint16_t colSrcOffset;
+	uint16_t count = rect.right - rect.left;
+	{
+		unit_t colDst = rect.left - viewport.getX();
+		unit_t colSrc = rect.left - origin.x - getX();
+
+		colDstShift = colDst % 8;
+		colSrcShift = colSrc % 8;
+		colDstOffset = colDst / 8;
+		colSrcOffset = colSrc / 8;
+	}
+	Sprite *thiz = const_cast<Sprite *>(this);
+
+	for (unit_t rowDst = rect.top - viewport.getY(), rowSrc = rect.top - origin.y - getY(),
+			rowSrcMax = rect.bottom - origin.y - getY(); rowSrc < rowSrcMax; ++rowSrc, ++rowDst) {
+
 		util::bitcopy(
-			viewport.getLine(row) + colDstOffset,
+			viewport.getLine(rowDst) + colDstOffset,
 			// This has to be a non-const call, but it is guaranteed that sprite data won't be modified here.
-			const_cast<ASRSprite *>(this)->getValueAt(rect.top - getY(), colSrcOffset),
-			rect.right - rect.left,
-			colSrc % 8,
-			colDst % 8,
+			thiz->getValueAt(rowSrc, colSrcOffset),
+			count,
+			colSrcShift,
+			colDstShift,
 			bitwise_xor
 		);
 	}

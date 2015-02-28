@@ -47,10 +47,11 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ASR_TEST;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Documents\Eclipse\ASR-1388_Driver\Sources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -60,11 +61,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ASR_TEST;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Documents\Eclipse\ASR-1388_Driver\Sources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -75,13 +77,26 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Sources\array_t.h" />
+    <ClInclude Include="..\Sources\ASRSprite.h" />
+    <ClInclude Include="..\Sources\ASRTextScroller.h" />
+    <ClInclude Include="..\Sources\bitutility.h" />
+    <ClInclude Include="..\Sources\cmath_ext.h" />
     <ClInclude Include="..\Sources\cstdlib_ext.h" />
+    <ClInclude Include="..\Sources\Graphics\geom_types.h" />
+    <ClInclude Include="..\Sources\Graphics\Object.h" />
+    <ClInclude Include="..\Sources\Graphics\Scene.h" />
+    <ClInclude Include="..\Sources\Graphics\Screen.h" />
+    <ClInclude Include="..\Sources\Graphics\Sprite.h" />
+    <ClInclude Include="..\Sources\Graphics\Viewport.h" />
     <ClInclude Include="..\Sources\type_traits_ext.h" />
     <ClInclude Include="ASR-1388_Driver.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Sources\ASRSprite.cpp" />
+    <ClCompile Include="..\Sources\ASRTextScroller.cpp" />
+    <ClCompile Include="..\Sources\bitutility.cpp" />
     <ClCompile Include="ASR-1388_Driver.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

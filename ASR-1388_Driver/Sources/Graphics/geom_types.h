@@ -9,37 +9,15 @@
 #define SOURCES_GRAPHICS_GEOM_TYPES_H_
 
 
-#include <cmath>
+#include "../cmath_ext.h"
 
-inline double round(double x) {
-	if (x != 0) {
-		return x > 0 ? floor(x + .5) : ceil(x - .5);
-	}
-	return 0;
-}
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
 
-inline float round(float x) {
-	if (x != 0) {
-		return x > 0 ? floor(x + .5f) : ceil(x - .5f);
-	}
-	return 0;
-}
-
-
-template <typename TUnit>
-TUnit minmax(TUnit a, TUnit b, TUnit &min, TUnit &max) {
-	if (a <= b) {
-		min = a;
-		max = b;
-
-		return a;
-	}
-	min = b;
-	max = a;
-
-	return b;
-}
-
+#ifndef max
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#endif
 
 namespace _2d {
 
@@ -62,7 +40,6 @@ struct rect_t {
 	TUnit top;
 	TUnit right;
 	TUnit bottom;
-
 
 	operator point_t<TUnit>() const {
 		point_t<TUnit> pt;
@@ -92,10 +69,10 @@ template <typename TUnit>
 bool intersect(const rect_t<TUnit> &a, const rect_t<TUnit> &b, rect_t<TUnit> &intersection) {
 	TUnit la, lb, ra, rb, ta, tb, ba, bb;
 
-	minmax(a.left, a.right, la, ra);
-	minmax(b.left, b.right, lb, rb);
-	minmax(a.top, a.bottom, ta, ba);
-	minmax(b.top, b.bottom, tb, bb);
+	minmax(a.left, a.right,  la, ra);
+	minmax(b.left, b.right,  lb, rb);
+	minmax(a.top,  a.bottom, ta, ba);
+	minmax(b.top,  b.bottom, tb, bb);
 
 	intersection.left   = max(la, lb);
 	intersection.top    = max(ta, tb);
@@ -103,7 +80,7 @@ bool intersect(const rect_t<TUnit> &a, const rect_t<TUnit> &b, rect_t<TUnit> &in
 	intersection.bottom = min(ba, bb);
 
 	return (intersection.left < intersection.right
-			|| intersection.top < intersection.right);
+			&& intersection.top < intersection.bottom);
 }
 
 template <typename TUnitRect, typename TUnitPoint>

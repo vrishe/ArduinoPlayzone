@@ -4,10 +4,6 @@
 #include "stdafx.h"
 #include "ASR-1388_Driver.h"
 
-static BYTE screen[8] = { 0, 36, 36, 36, 0, 102, 60, 0 };
-
-// TODO: place screen interface code here.
-
 
 #define MAX_LOADSTRING 100
 
@@ -114,7 +110,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 }
 
 
-#define AA_RANK 3
+#define AA_RANK 2			// A power of 2.
+#define AA_(dimen) \
+	((dimen) * antialias)
 
 static HBITMAP hBmpOut;
 static HGDIOBJ hBmpRestore;
@@ -172,6 +170,220 @@ BOOL GetClientRectAntialias(HWND hWnd, LPRECT rcClient, BYTE antialias) {
 	return FALSE;
 }
 
+
+#include "Graphics/Scene.h"
+#include "Graphics/Screen.h"
+#include "ASRSprite.h"
+#include "ASRTextScroller.h"
+
+#include <stdint.h>
+
+// TODO: place screen interface code here.
+class TestScreen : public _2d::Screen<uint8_t, uint8_t, TestScreen, 8, 8> {
+
+	uint8_t data[8];
+
+public:
+	TestScreen::uunit_t *TestScreen::getLine(uunit_t lineIndex) {
+		return this->data + lineIndex;
+	}
+
+	virtual TestScreen TestScreen::getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) const {
+		return TestScreen(*this);
+	}
+
+	virtual void flush() {
+		memset(data, 0x00, sizeof(data));
+	}
+
+	void display(HDC &hDc, const RECT &client, BYTE antialias) const {
+		antialias = 1 << antialias;
+
+		LONG width = (client.right - client.left)  / getWidth();
+		LONG height = (client.bottom - client.top) / getHeight();
+
+		RECT cell;
+		for (int i = 0, imax = getHeight(); i < imax; ++i) {
+			cell.top = i * height;
+			cell.bottom = cell.top + height;
+
+			uint8_t line = *const_cast<TestScreen *>(this)->getLine(i);
+			for (int j = 0, jmax = getWidth(); j < jmax; ++j) {
+				cell.left = j * width;
+				cell.right = cell.left + width;
+
+				SetDCBrushColor(hDc, !!((line << j) & 0x80) ?
+					COLOR_LED_ON : COLOR_LED_OFF);
+
+				Ellipse(hDc, cell.left + AA_(5), cell.top + AA_(5),
+					cell.right - AA_(5), cell.bottom - AA_(5));
+			}
+		}
+	}
+};
+
+
+static TestScreen screen;
+
+// typedef _2d::Scene<uint8_t, uint8_t> TestScene;
+// static TestScene  scene;
+// static asr::Sprite smiley(8, 8);
+
+// static void initScene() {
+
+// 	uint8_t *spriteData;
+
+// 	spriteData = smiley.getValueAt(0);
+// 	spriteData[0] = 0x00;
+// 	spriteData[1] = 0x24;
+// 	spriteData[2] = 0x24;
+// 	spriteData[3] = 0x24;
+// 	spriteData[4] = 0x00;
+// 	spriteData[5] = 0x66;
+// 	spriteData[6] = 0x3c;
+// 	spriteData[7] = 0x00;
+
+// 	scene.add(smiley);
+// }
+
+
+static unsigned long ticks;
+static asr::TextScroller textScroller(&screen);
+static asr::Sprite *font[20] = { /* zero */ };
+
+static void initTextScroller() {
+	uint8_t *spriteData;
+
+	if (!!(font[0] = new (std::nothrow) asr::Sprite(5, 5))) { // D
+		spriteData = font[0]->getValueAt(0);
+
+		spriteData[0] = 0xe0;
+		spriteData[1] = 0x90;
+		spriteData[2] = 0x90;
+		spriteData[3] = 0x90;
+		spriteData[4] = 0xe0;
+	}
+	if (!!(font[1] = new (std::nothrow) asr::Sprite(5, 5))) { // E
+		spriteData = font[1]->getValueAt(0);
+
+		spriteData[0] = 0xf0;
+		spriteData[1] = 0x80;
+		spriteData[2] = 0xe0;
+		spriteData[3] = 0x80;
+		spriteData[4] = 0xf0;
+	}
+	if (!!(font[4] = new (std::nothrow) asr::Sprite(5, 5))) { // H
+		spriteData = font[4]->getValueAt(0);
+
+		spriteData[0] = 0x90;
+		spriteData[1] = 0x90;
+		spriteData[2] = 0xf0;
+		spriteData[3] = 0x90;
+		spriteData[4] = 0x90;
+	}
+	if (!!(font[8] = new (std::nothrow) asr::Sprite(5, 5))) { // L
+		spriteData = font[8]->getValueAt(0);
+
+		spriteData[0] = 0x80;
+		spriteData[1] = 0x80;
+		spriteData[2] = 0x80;
+		spriteData[3] = 0x80;
+		spriteData[4] = 0xf0;
+	}
+	if (!!(font[11] = new (std::nothrow) asr::Sprite(5, 5))) { // O
+		spriteData = font[11]->getValueAt(0);
+
+		spriteData[0] = 0x60;
+		spriteData[1] = 0x90;
+		spriteData[2] = 0x90;
+		spriteData[3] = 0x90;
+		spriteData[4] = 0x60;
+	}
+	if (!!(font[14] = new (std::nothrow) asr::Sprite(5, 5))) { // R
+		spriteData = font[14]->getValueAt(0);
+
+		spriteData[0] = 0xe0;
+		spriteData[1] = 0x90;
+		spriteData[2] = 0xe0;
+		spriteData[3] = 0x90;
+		spriteData[4] = 0x90;
+	}
+	if (!!(font[19] = new (std::nothrow) asr::Sprite(6, 5))) { // W
+		spriteData = font[19]->getValueAt(0);
+		
+		spriteData[0] = 0x88;
+		spriteData[1] = 0x88;
+		spriteData[2] = 0xa8;
+		spriteData[3] = 0xa8;
+		spriteData[4] = 0x50;
+	}
+	strcpy(fontIndex, "HELLOWORLD");
+
+	const char text[] = "HELLO WORLD";
+	textScroller.setText(text, _countof(text), 1, 5, font, _countof(font), 'D', asr::LeftToRight);
+	textScroller.placeAtRow(2);
+}
+
+
+static void RenderWorld(HWND hWnd) {
+	screen.flush();
+	scene.renderTo(screen);
+
+	if (!!hWnd) {
+		InvalidateRect(hWnd, NULL, FALSE);
+	}
+}
+
+
+BOOL WriteABuffer(HANDLE hComm, char * lpBuf, DWORD dwToWrite)
+{
+	OVERLAPPED osWrite = { 0 };
+	DWORD dwWritten;
+	DWORD dwRes;
+	BOOL fRes;
+
+	// Create this write operation's OVERLAPPED structure's hEvent.
+	osWrite.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (osWrite.hEvent == NULL)
+		// error creating overlapped event handle
+		return FALSE;
+
+	// Issue write.
+	if (!WriteFile(hComm, lpBuf, dwToWrite, &dwWritten, &osWrite)) {
+		if (GetLastError() != ERROR_IO_PENDING) {
+			// WriteFile failed, but isn't delayed. Report error and abort.
+			fRes = FALSE;
+		} else {
+			// Write is pending.
+			dwRes = WaitForSingleObject(osWrite.hEvent, INFINITE);
+		}
+		switch (dwRes)
+		{
+			// OVERLAPPED structure's event has been signaled. 
+		case WAIT_OBJECT_0:
+			if (!GetOverlappedResult(hComm, &osWrite, &dwWritten, FALSE))
+				fRes = FALSE;
+			else
+				// Write operation completed successfully.
+				fRes = TRUE;
+			break;
+
+		default:
+			// An error has occurred in WaitForSingleObject.
+			// This usually indicates a problem with the
+			// OVERLAPPED structure's event handle.
+			fRes = FALSE;
+			break;
+		}
+	} else {
+		// WriteFile completed immediately.
+		fRes = TRUE;
+	}
+	CloseHandle(osWrite.hEvent);
+	return fRes;
+}
+
+
 //
 //  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
 //
@@ -185,12 +397,33 @@ BOOL GetClientRectAntialias(HWND hWnd, LPRECT rcClient, BYTE antialias) {
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static HDC hDc;
+	static HANDLE hCom;
 
 	switch (message)
 	{
 	case WM_CREATE:
+	{
 		hDc = CreateCompatibleDC(GetDC(NULL));
+		// hCom = CreateFile(_T("COM4"),
+		// 	GENERIC_READ | GENERIC_WRITE,
+		// 	0,
+		// 	0,
+		// 	OPEN_EXISTING,
+		// 	FILE_FLAG_OVERLAPPED,
+		// 	0
+		// );
+		// if (hCom == INVALID_HANDLE_VALUE) {
+		// 	DestroyWindow(hWnd);
+
+		// 	return -1;
+		// }
+		//initScene();
+
+		initTextScroller();
+
+		RenderWorld(NULL);
 		break;
+	}
 	case WM_SIZE:
 		CreateOutputBitmap(GetDC(NULL), hDc, LOWORD(lParam), HIWORD(lParam), AA_RANK);
 		break;
@@ -205,26 +438,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (!!dcBrush && GetClientRectAntialias(hWnd, &client, AA_RANK)) {
 			SelectObject(hDc, dcBrush);
 
-			LONG width  = (client.right - client.left) / (sizeof(*screen) << 3);
-			LONG height = (client.bottom - client.top) / _countof(screen);
-
-			RECT cell;
-			for (int i = 0; i < _countof(screen); ++i) {
-				cell.top = i * height;
-				cell.bottom = cell.top + height;
-
-				BYTE line = screen[i];
-				for (int j = 0; j < (sizeof(*screen) << 3); ++j) {
-					cell.left = j * width;
-					cell.right = cell.left + width;
-
-					SetDCBrushColor(hDc, !!((line << j) & 0x80) ? 
-						COLOR_LED_ON : COLOR_LED_OFF);
-
-					Ellipse(hDc, cell.left + 40, cell.top + 40,
-						cell.right - 40, cell.bottom - 40);
-				}
-			}
+			screen.display(hDc, client, AA_RANK);
 			CommitOutputBitmap(hDc, hDcWindow, 
 				client.right - client.left, 
 				client.bottom - client.top,
@@ -234,10 +448,45 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 		break;
 	}
+	case WM_KEYDOWN:
+		switch (wParam) {
+		// case VK_LEFT:
+		// 	WriteABuffer(hCom, "l", 1);
+		// 	smiley.moveBy(-1, 0);
+		// 	RenderWorld(hWnd);
+		// 	break;
+
+		// case VK_RIGHT:
+		// 	WriteABuffer(hCom, "r", 1);
+		// 	smiley.moveBy(1, 0);
+		// 	RenderWorld(hWnd);
+		// 	break;
+
+		// case VK_UP:
+		// 	WriteABuffer(hCom, "u", 1);
+		// 	smiley.moveBy(0, -1);
+		// 	RenderWorld(hWnd);
+		// 	break;
+
+		// case VK_DOWN:
+		// 	WriteABuffer(hCom, "d", 1);
+		// 	smiley.moveBy(0, 1);
+		// 	RenderWorld(hWnd);
+		// 	break;
+		case VK_SPACE:
+			textScroller.updateText(ticks += 127);
+
+			InvalidateRect(hWnd, NULL, FALSE);
+			break;
+		}
+		break;
 	case WM_DESTROY:
 		DeleteOutputBitmap(hDc);
 		DeleteDC(hDc);
 
+		if (hCom != INVALID_HANDLE_VALUE) {
+			CloseHandle(hCom);
+		}
 		PostQuitMessage(0);
 		break;
 	default:
