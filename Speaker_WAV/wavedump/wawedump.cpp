@@ -120,16 +120,18 @@ static errno_t processFile(const std::_tstring &path, bool verbose) {
 						}
 						if (readTotal % 16 == 0) {
 							ss << std::endl;
-						}
-						if (readTotal % 800 == 0) {
-							std::cout << ss.str();
-							ss.str("");
-							ss.clear();
+
+							if (readTotal % 800 == 0) {
+								std::cout << ss.str();
+
+								ss.str("");
+								ss.clear();
+							}
 						}
 					}
-					if (ss.tellp() > 0) {
-						std::cout << ss.str();
-					}
+				}
+				if (ss.tellp() > 0) {
+					std::cout << ss.str();
 				}
 			}
 			delete[] buffer;
