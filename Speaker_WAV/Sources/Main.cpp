@@ -18,6 +18,8 @@
 
 #define PIN_SIGNAL_LED 13
 #define PIN_SIGNAL_OUT 11 // 3 or 11 to use with Timer2
+#define SIGNAL_AT(index) \
+	(pgm_read_byte(SOUND_DATA + (index))/* - 0x80*/)
 
 
 volatile uint16_t sample;
@@ -38,31 +40,42 @@ void stopPlayback()
     digitalWrite(PIN_SIGNAL_OUT, LOW);
 }
 
+
+#if PIN_SIGNAL_OUT == 11
+
 // This is called at SAMPLE_RATE Hz to load the next sample.
 ISR(TIMER1_COMPA_vect) {
     if (sample >= sizeof(SOUND_DATA)) {
         if (sample == sizeof(SOUND_DATA) + lastSample) {
             stopPlayback();
-        }
-        else {
-            if(PIN_SIGNAL_OUT==11){
-                // Ramp down to zero to reduce the click at the end of playback.
-                OCR2A = sizeof(SOUND_DATA) + lastSample - sample;
-            } else {
-                OCR2B = sizeof(SOUND_DATA) + lastSample - sample;
-            }
-        }
-    }
-    else {
-        if(PIN_SIGNAL_OUT==11){
-            OCR2A = pgm_read_byte(&SOUND_DATA[sample]);
         } else {
-            OCR2B = pgm_read_byte(&SOUND_DATA[sample]);
+			// Ramp down to zero to reduce the click at the end of playback.
+			OCR2A = sizeof(SOUND_DATA) + lastSample - sample;
         }
+    } else {
+		OCR2A = SIGNAL_AT(sample);
     }
-
     ++sample;
 }
+
+#else // PIN_SIGNAL_OUT == 3
+
+// This is called at SAMPLE_RATE Hz to load the next sample.
+ISR(TIMER1_COMPA_vect) {
+    if (sample >= sizeof(SOUND_DATA)) {
+        if (sample == sizeof(SOUND_DATA) + lastSample) {
+            stopPlayback();
+        } else {
+        	// Ramp down to zero to reduce the click at the end of playback.
+        	OCR2B = sizeof(SOUND_DATA) + lastSample - sample;
+        }
+    } else {
+    	OCR2B = SIGNAL_AT(sample);
+    }
+    ++sample;
+}
+
+#endif // PIN_SIGNAL_OUT == 11
 
 void startPlayback()
 {
@@ -78,7 +91,8 @@ void startPlayback()
     TCCR2A |= _BV(WGM21) | _BV(WGM20);
     TCCR2B &= ~_BV(WGM22);
 
-    if(PIN_SIGNAL_OUT==11){
+#if PIN_SIGNAL_OUT == 11
+
         // Do non-inverting PWM on pin OC2A (p.155)
         // On the Arduino this is pin 11.
         TCCR2A = (TCCR2A | _BV(COM2A1)) & ~_BV(COM2A0);
@@ -87,8 +101,10 @@ void startPlayback()
         TCCR2B = (TCCR2B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10);
 
         // Set initial pulse width to the first sample.
-        OCR2A = pgm_read_byte(&SOUND_DATA[0]);
-    } else {
+        OCR2A = 0x7f; // SIGNAL_AT(0);
+
+#else // PIN_SIGNAL_OUT == 3
+
         // Do non-inverting PWM on pin OC2B (p.155)
         // On the Arduino this is pin 3.
         TCCR2A = (TCCR2A | _BV(COM2B1)) & ~_BV(COM2B0);
@@ -97,8 +113,9 @@ void startPlayback()
         TCCR2B = (TCCR2B & ~(_BV(CS12) | _BV(CS11))) | _BV(CS10);
 
         // Set initial pulse width to the first sample.
-        OCR2B = pgm_read_byte(&SOUND_DATA[0]);
-    }
+        OCR2B = 0x7f; // SIGNAL_AT(0);
+
+#endif // PIN_SIGNAL_OUT == 11
 
     // Set up Timer 1 to send a sample every interrupt.
     cli();
@@ -119,7 +136,7 @@ void startPlayback()
     // Enable interrupt when TCNT1 == OCR1A (p.136)
     TIMSK1 |= _BV(OCIE1A);
 
-    lastSample = pgm_read_byte(&SOUND_DATA[sizeof(SOUND_DATA)-1]);
+    lastSample = SIGNAL_AT(sizeof(SOUND_DATA)-1);
     sample = 0;
     sei();
 }
@@ -136,5 +153,10 @@ void setup()
 
 void loop()
 {
+	// Spin loop during playback
+	while(sample < sizeof(SOUND_DATA)) {
+		/* Nothing to do */
+	}
+	std::terminate();
 }
 
