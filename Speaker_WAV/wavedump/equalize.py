@@ -4,24 +4,42 @@ import sys, getopt
 import re, struct, binascii
 
 def main(argv):
-	threshold = 255
+	scale = 255
+	cutoff = 255
+	invert = False
+	offset = 0
 
 	try:
-		opts, args = getopt.getopt(argv,"ht:", ["help", "threshold="])
+		opts, args = getopt.getopt(argv,"his:c:o:", ["help", "invert", "scale=", "cutoff=", "offset="])
 
 		for opt, arg in opts:
 			if opt in ('-h', '--help'):
 				raise getopt.GetoptError('')
-			elif opt in ('-t', '--threshold'):
-				threshold = int(arg);
+			elif opt in ('-i', '--invert'):
+				invert = True
+			elif opt in ('-s', '--scale'):
+				scale = int(arg);
 
-				if not (0 <= threshold and threshold < 255):
-					print ('\nBad threshold value: %0d\n' % threshold)
+				if not (0 <= scale and scale <= 255):
+					print ('\nBad scale value: %0d\n' % scale)
 					raise getopt.GetoptError('')
+			elif opt in ('-c', '--cutoff'):
+				cutoff = int(arg)
+
+				if not (0 <= cutoff and cutoff <= 255):
+					print ('\nBad cutoff value: %0d\n' % cutoff)
+					raise getopt.GetoptError('')
+			elif opt in ('-o', '--offset'):
+				offset = min(max(int(arg), -128), 127)
 
 	except getopt.GetoptError:
-		print ('\nequalize.py [-h (--help), -t (--threshold=)<value>] <inputfile> <outputfile>')
-		print ('\n\twhere <value> lies within [0..255)')
+		print ('\nequalize.py [-h (--help), -i, -t <value1>, -c <value1>, -o <value2>] <inputfile> <outputfile>')
+		print ('\n -i (--invert) - set this flag to invert the output sample magnitudes (255 - Vs)')
+		print ('\n -t (--scale)-a scale value, the resulting samples are limited with')
+		print ('\n -c (--cutoff) - a cutoff value, intermediate sample values will be limited with')
+		print ('\n -o (--offset) - shift the resulting sample magnitude by <value2>')
+		print ('\n    All the <value1> values lie within range [0..255]')
+		print ('\n    All the <value2> values lie within range [-128..127]')
 		return 2
 
 	with open (argv[-2], "r") as fin:
@@ -36,27 +54,25 @@ def main(argv):
 
 			# Shift to zero point first:
 			for i in range(len(values)):
-				amplitude = min(struct.unpack('b', binascii.unhexlify(values[i].replace('0x','').strip()))[0] + 128, threshold)
+				amplitude = struct.unpack('b', binascii.unhexlify(values[i].replace('0x','').strip()))[0]
+
+				if invert:
+					amplitude = -amplitude
 
 				amplitudes.append(amplitude)
 				if amplitude > amplitudeMax:
 					amplitudeMax = amplitude
-
-			# Normalize volume if needed
-			if 0 < amplitudeMax and amplitudeMax < 255:
-				amplitudeMax = float(amplitudeMax)
-				for i in range(len(amplitudes)):
-					amplitudes[i] = round(255 * amplitudes[i] / amplitudeMax);
 
 			with open(argv[-1], "w") as fout:
 				fout.write(data[:match.start()] + "{\n")
 
 				accumulator = ''
 				countWrites = 0;
+				amplitudeMax = float(amplitudeMax)
 				for i in range(len(amplitudes)):
 					if (countWrites % 16) == 0:
 						accumulator += '\t'
-					accumulator += '0x%02x, ' % amplitudes[i]
+					accumulator += '0x%02x, ' % min(round(scale * amplitudes[i] / float(amplitudeMax)) + offset, cutoff);
 
 					countWrites = countWrites + 1
 					if (countWrites % 16) == 0:

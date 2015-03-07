@@ -136,5 +136,6 @@ void setup()
 
 void loop()
 {
+	std::terminate();
 }
 
