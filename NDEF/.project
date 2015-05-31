@@ -44,7 +44,7 @@
 		<link>
 			<name>Sources/Ndef.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Arduino/libraries/PN532/NDEF/Ndef.cpp</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/Arduino/libraries/PN532/NDEF/internal/Ndef.cpp</locationURI>
 		</link>
 		<link>
 			<name>Sources/NdefMessage.cpp</name>

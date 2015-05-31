@@ -15,6 +15,7 @@ ipch
 
 ### Project Specific ###
 /.private
+lib*.a
 
 
 ### Plaftorm: Windows ###

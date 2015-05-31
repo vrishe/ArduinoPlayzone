@@ -207,6 +207,9 @@
 							<tool id="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug.1869269343" name="AVR Create EEPROM image" superClass="de.innot.avreclipse.tool.objcopy.eeprom.winavr.app.debug"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="de.innot.avreclipse.configuration.lib.release.1764154575.1307975389.334868227" name="Ndef.cpp" rcbsApplicability="disable" resourcePath="Sources/Ndef.cpp" toolsToInvoke="de.innot.avreclipse.tool.cppcompiler.app.debug.1407853992.863095743">
+						<tool id="de.innot.avreclipse.tool.cppcompiler.app.debug.1407853992.863095743" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.debug.1407853992"/>
+					</fileInfo>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
