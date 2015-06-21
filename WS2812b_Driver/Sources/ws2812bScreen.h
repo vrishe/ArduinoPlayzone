@@ -27,14 +27,14 @@ typedef union tagColor {
 namespace ws2812b {
 
 template<uint8_t pin>
-class ws2812bScreen : public _2d::Screen<int32_t, color_rgb, ws2812bScreen, 10, 6> {
+class ws2812bScreen : public _2d::Screen<int32_t, color_rgb, 10, 6> {
 
-	color_rgb data[60];
+	color_rgb data[6][10];
 
 public:
 
-	using typename _2d::Screen<int32_t, color_rgb, ws2812bScreen, 10, 6>::unit_t;
-	using typename _2d::Screen<int32_t, color_rgb, ws2812bScreen, 10, 6>::uunit_t;
+	using typename _2d::Screen<int32_t, color_rgb, 10, 6>::unit_t;
+	using typename _2d::Screen<int32_t, color_rgb, 10, 6>::uunit_t;
 
 
 	virtual ~ws2812bScreen() {
@@ -42,41 +42,28 @@ public:
 	}
 
 
-	void init();
+	void init() {
+		pinMode(pin, OUTPUT);
+	}
 
-	void display() const;
+	void display() const {
+		write<pin>(data, sizeof(data));
+	}
 
 
-	virtual uunit_t *getLine(uunit_t lineIndex);
+	virtual uunit_t *getLine(uunit_t lineIndex) {
+		return data[lineIndex];
+	}
 
 	virtual void flush() {
 		memset(data, 0x00, sizeof(data));
 	}
 
 
-	virtual ws2812bScreen getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) const;
+	virtual ws2812bScreen &getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) {
+		return *this;
+	}
 };
-
-
-template<uint8_t pin>
-void ws2812bScreen<pin>::init() {
-	pinMode(pin, OUTPUT);
-}
-
-template<uint8_t pin>
-void ws2812bScreen<pin>::display() const {
-	write<pin>(data);
-}
-
-template<uint8_t pin>
-ws2812bScreen::uunit_t *ws2812bScreen<pin>::getLine(uunit_t lineIndex) {
-	return this->data + lineIndex;
-}
-
-template<uint8_t pin>
-ws2812bScreen<pin> ws2812bScreen<pin>::getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) const {
-	return ws2812bScreen(*this);
-}
 
 } /* namespace ws2812b */
 

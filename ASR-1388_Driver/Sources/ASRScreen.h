@@ -16,7 +16,7 @@
 
 namespace asr {
 
-class Screen : public _2d::Screen<uint8_t, uint8_t, Screen, 8, 8>  {
+class Screen : public _2d::Screen<uint8_t, uint8_t, 8, 8> {
 
 	uint32_t pinClock;
 	uint32_t pinLatch;
@@ -48,13 +48,9 @@ public:
 	void display() const;
 
 	virtual uunit_t *getLine(uunit_t lineIndex);
+	virtual void flush();
 
-	virtual void flush() {
-		memset(data, 0x00, sizeof(data));
-	}
-
-
-	virtual Screen getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) const;
+	virtual Screen &getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h);
 };
 
 typedef _2d::Scene<uint8_t, uint8_t> Scene;

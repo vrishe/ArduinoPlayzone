@@ -66,7 +66,7 @@
 								</option>
 								<option id="de.innot.avreclipse.cpplinker.option.otherlinkargs.1140572746" name="Other Arguments" superClass="de.innot.avreclipse.cpplinker.option.otherlinkargs" value="" valueType="string"/>
 								<option id="de.innot.avreclipse.cpplinker.option.nosyms.1407640102" name="Omit Symbols (-s)" superClass="de.innot.avreclipse.cpplinker.option.nosyms" value="true" valueType="boolean"/>
-								<option id="de.innot.avreclipse.cpplinker.option.genmap.2128727425" superClass="de.innot.avreclipse.cpplinker.option.genmap" value="" valueType="string"/>
+								<option id="de.innot.avreclipse.cpplinker.option.genmap.2128727425" name="Map Filename" superClass="de.innot.avreclipse.cpplinker.option.genmap" value="" valueType="string"/>
 								<inputType id="de.innot.avreclipse.tool.cpplinker.input.807990262" name="OBJ Files" superClass="de.innot.avreclipse.tool.cpplinker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -143,7 +143,7 @@
 								</option>
 								<option id="de.innot.avreclipse.cpplinker.option.otherlinkargs.1867414652" name="Other Arguments" superClass="de.innot.avreclipse.cpplinker.option.otherlinkargs" value="" valueType="string"/>
 								<option id="de.innot.avreclipse.cpplinker.option.nosyms.546736125" name="Omit Symbols (-s)" superClass="de.innot.avreclipse.cpplinker.option.nosyms" value="true" valueType="boolean"/>
-								<option id="de.innot.avreclipse.cpplinker.option.genmap.499667468" superClass="de.innot.avreclipse.cpplinker.option.genmap" value="" valueType="string"/>
+								<option id="de.innot.avreclipse.cpplinker.option.genmap.499667468" name="Map Filename" superClass="de.innot.avreclipse.cpplinker.option.genmap" value="" valueType="string"/>
 								<inputType id="de.innot.avreclipse.tool.cpplinker.input.1738142216" name="OBJ Files" superClass="de.innot.avreclipse.tool.cpplinker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -241,7 +241,7 @@
 								</option>
 								<option id="de.innot.avreclipse.cpplinker.option.nosyms.67845769" name="Omit Symbols (-s)" superClass="de.innot.avreclipse.cpplinker.option.nosyms" value="true" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cpplinker.option.otherlinkargs.2081268206" name="Other Arguments" superClass="de.innot.avreclipse.cpplinker.option.otherlinkargs" value="" valueType="string"/>
-								<option id="de.innot.avreclipse.cpplinker.option.genmap.1923033989" superClass="de.innot.avreclipse.cpplinker.option.genmap" value="" valueType="string"/>
+								<option id="de.innot.avreclipse.cpplinker.option.genmap.1923033989" name="Map Filename" superClass="de.innot.avreclipse.cpplinker.option.genmap" value="" valueType="string"/>
 								<inputType id="de.innot.avreclipse.tool.cpplinker.input.1396588119" name="OBJ Files" superClass="de.innot.avreclipse.tool.cpplinker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -339,7 +339,7 @@
 								</option>
 								<option id="de.innot.avreclipse.cpplinker.option.nosyms.582239206" name="Omit Symbols (-s)" superClass="de.innot.avreclipse.cpplinker.option.nosyms" value="true" valueType="boolean"/>
 								<option id="de.innot.avreclipse.cpplinker.option.otherlinkargs.567573256" name="Other Arguments" superClass="de.innot.avreclipse.cpplinker.option.otherlinkargs" value="" valueType="string"/>
-								<option id="de.innot.avreclipse.cpplinker.option.genmap.203281618" superClass="de.innot.avreclipse.cpplinker.option.genmap" value="" valueType="string"/>
+								<option id="de.innot.avreclipse.cpplinker.option.genmap.203281618" name="Map Filename" superClass="de.innot.avreclipse.cpplinker.option.genmap" value="" valueType="string"/>
 								<inputType id="de.innot.avreclipse.tool.cpplinker.input.1358991737" name="OBJ Files" superClass="de.innot.avreclipse.tool.cpplinker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
