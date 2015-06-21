@@ -375,6 +375,6 @@ namespace ws2812b {
 		IRQ_ENABLED();         // Re-enable interrupts now that we are done.
 		delayMicroseconds(50);  // Hold the line low for 50 microseconds to send the reset signal.
 	}
-}
+} /* namespace ws2812b */
 
 #endif /* SOURCES_WS2812B_H_ */

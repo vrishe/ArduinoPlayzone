@@ -6,7 +6,12 @@
  */
 
 #include <Arduino.h>
-#include "cstdlib_ext.h"
+
+#ifdef abs
+#undef abs
+#endif
+
+#include <cstdlib>
 
 
 #define PIN_CLOCK 	13

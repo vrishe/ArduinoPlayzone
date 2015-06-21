@@ -3,6 +3,7 @@
 	<name>WS2812b_Driver</name>
 	<comment></comment>
 	<projects>
+		<project>ASR-1388_Driver</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
