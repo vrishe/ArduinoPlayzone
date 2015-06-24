@@ -5,24 +5,92 @@
  *      Author: Admin
  */
 
+#ifndef WS2812B_HSV_DEMO
+
+#include <Arduino.h>
+#include <stdint.h>
+
+#include "ws2812b_write.h"
+#include "ws2812b_types.h"
+
+static ws2812b::color_rgb frameBuffer[5][60];
+
+
+static bool active;
+static size_t indexOutFrame;
+
+ISR(TIMER1_COMPA_vect) {
+	if (active) {
+		ws2812b::write<2>(frameBuffer[indexOutFrame]);
+
+		indexOutFrame = (indexOutFrame + 1) % 5;
+	} else {
+		TCCR1B = TCCR1B & ~_BV(CS12);
+	}
+}
+
+
+static size_t indexInFrame, indexInPixel;
+
+void loop() {
+	size_t availableLength;
+	if (!!(availableLength = Serial.available())) {
+		bool activeLast = active;
+
+		active = true;
+
+		if (!activeLast) {
+			TCCR1B = TCCR1B | _BV(CS12);
+		}
+		uint8_t *frame = reinterpret_cast<uint8_t *>(frameBuffer[indexInFrame]);
+
+		availableLength = min(availableLength, 180 - indexInFrame);
+		Serial.readBytes(frame + indexInPixel, availableLength);
+		indexInPixel += availableLength;
+
+		if (indexInPixel >= 180) {
+			indexInFrame = (indexInFrame + 1) % 5;
+
+			if (indexInFrame == indexOutFrame) {
+				indexInFrame = (indexOutFrame + 1) % 5;
+			}
+		}
+	} else {
+		active = false;
+	}
+}
+
+void setup() {
+	DDRB |= B00100000;
+	DDRD |= B00000100;
+
+	Serial.begin(9600);
+
+	cli();
+	{
+		TCCR1A = 0;
+		TCCR1B = 0;
+
+		OCR1A  = 1562;							// ~40Hz or 25ms per frame
+		TCCR1B = _BV(WGM12) /*| _BV(CS12)*/;	// CTC mode, 256 pre-scaler
+
+		TCNT1  = 0;
+		TIMSK1 = _BV(OCIE1A);
+	}
+	sei();
+
+	PORTB = B00100000;
+}
+
+#else  // ifdef WS2812B_HSV_DEMO
+
 #include <Arduino.h>
 #include <stdint.h>
 
 #include "ws2812b_Screen.h"
-#include "ws2812b_Sprite.h"
+
 
 static ws2812b::Screen<2> screenMain;
-//static const ws2812b::color_rgb colors_reference[] = {
-//		{ 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 },
-//		{ 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 },
-//		{ 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 },
-//		{ 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 },
-//		{ 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 },
-//		{ 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 }, { 0x00, 0xff, 0x00 },
-//};
-//
-//static ws2812b::Scene  scene;
-//static ws2812b::Sprite spriteTest(6, 6, colors_reference);
 
 const byte dim_curve[] = {
     0,   1,   1,   2,   2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   3,   3,
@@ -224,3 +292,5 @@ void setup() {
 
 	PORTB = B00100000;
 }
+
+#endif // ifndef WS2812B_HSV_DEMO
