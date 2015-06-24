@@ -8,7 +8,6 @@
 #include "bitutility.h"
 
 
-namespace asr {
 namespace util {
 
 namespace {
@@ -105,7 +104,4 @@ uint8_t bitcopy(uint8_t *dst, const uint8_t *src, uint16_t count, uint8_t shiftI
 	return dst[length];
 }
 
-} /* namespace util */
-} /* namespace asr */
-
-
+} 

@@ -47,7 +47,7 @@ public:
 	void init(uint8_t pinClock, uint8_t pinLatch, uint8_t pinData);
 	void display() const;
 
-	virtual uunit_t *getLine(uunit_t lineIndex);
+	virtual uint8_t *getLine(uunit_t lineIndex);
 	virtual void flush();
 
 	virtual Screen &getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h);

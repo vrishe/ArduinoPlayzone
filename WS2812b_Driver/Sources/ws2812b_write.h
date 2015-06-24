@@ -231,8 +231,8 @@ namespace ws2812b {
 		colors += offset;
 
 #if defined(__AVR__)
-		digitalWrite(pin, LOW);
 		pinMode(pin, OUTPUT);
+		digitalWrite(pin, LOW);
 #elif defined(__arm__) // defined(__AVR__)
 		Pio * port = g_APinDescription[pin].pPort;
 		uint32_t pinValue = g_APinDescription[pin].ulPin;
@@ -241,7 +241,7 @@ namespace ws2812b {
 
 		IRQ_DISABLED();   // Disable interrupts temporarily because we don't want our pulse timing to be messed up.
 
-		while(count--)
+		while(!!count--)
 		{
 			// Send a color to the LED strip.
 			// The assembly below also increments the 'colors' pointer,
@@ -252,7 +252,7 @@ namespace ws2812b {
 				"ld __tmp_reg__, %a0\n"          // Read the green component and leave the pointer pointing to green.
 				"rcall send_led_strip_byte%=\n"  // Send green component.
 				"ld __tmp_reg__, -%a0\n"         // Read the red component and leave the pointer at red.
-				"rcall send_led_strip_byte%=\n"  // Send green component.
+				"rcall send_led_strip_byte%=\n"  // Send red component.
 				"ld __tmp_reg__, %a0+\n"         // Advance pointer from red to green.
 				"ld __tmp_reg__, %a0+\n"         // Advance pointer from green to blue.
 				"ld __tmp_reg__, %a0+\n"         // Read the blue component and leave the pointer on the next color's red.
@@ -307,7 +307,7 @@ namespace ws2812b {
 				:
 				"0"  (colors),         // %a0 points to the next color to display
 				"I"  (pinAddr[pin]),   // %2 is the port register (e.g. PORTC)
-				"I"  (pinBit [pin])     // %3 is the pin number (0-8)
+				"I"  (pinBit [pin])    // %3 is the pin number (0-8)
 			);
 
 #elif defined(__arm__) // defined(__AVR__)
@@ -363,6 +363,7 @@ namespace ws2812b {
 				"cc"
 			);
 #endif // defined(__arm__)
+		}
 
 #if defined(__AVR__)
 			// Experimentally on an AVR we found that one NOP is required after the SEI to actually let the
@@ -371,7 +372,7 @@ namespace ws2812b {
 			asm volatile("nop\n");
 			IRQ_DISABLED();
 #endif // defined(__AVR__)
-		}
+
 		IRQ_ENABLED();         // Re-enable interrupts now that we are done.
 		delayMicroseconds(50);  // Hold the line low for 50 microseconds to send the reset signal.
 	}

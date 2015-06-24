@@ -11,16 +11,14 @@
 
 #include <stdint.h>
 
-namespace asr {
+
 namespace util {
 
 typedef uint8_t (*bitwise_op)(uint8_t, uint8_t);
 
 uint8_t bitcopy(uint8_t *dst, const uint8_t *src, uint16_t count, uint8_t shiftIn, uint8_t shiftOut, bitwise_op op);
 
-} /* namespace util */
-} /* namespace asr */
+} 
 
-#define bitsizeof(type) (sizeof(type) << 3)
+#endif
 
-#endif /* SOURCES_BITUTILITY_H_ */
