@@ -13,50 +13,27 @@
 #include "ws2812b_write.h"
 #include "ws2812b_types.h"
 
-static ws2812b::color_rgb frameBuffer[5][60];
+static ws2812b::color_rgb frameBuffer[1][60] = {};
 
 
-static bool active;
-static size_t indexOutFrame;
+//static volatile size_t indexOutFrame, indexInFrame;
 
-ISR(TIMER1_COMPA_vect) {
-	if (active) {
-		ws2812b::write<2>(frameBuffer[indexOutFrame]);
+//ISR(TIMER1_COMPA_vect) {
+//	ws2812b::write<2>(frameBuffer[indexOutFrame]);
+//
+//	if (++indexOutFrame == _countof(frameBuffer)) {
+//		TCCR1B = TCCR1B & ~_BV(CS12);
+//
+//		indexInFrame = 0;
+//	}
+//}
 
-		indexOutFrame = (indexOutFrame + 1) % 5;
-	} else {
-		TCCR1B = TCCR1B & ~_BV(CS12);
-	}
-}
 
-
-static size_t indexInFrame, indexInPixel;
+//static size_t indexInPixel;
 
 void loop() {
-	size_t availableLength;
-	if (!!(availableLength = Serial.available())) {
-		bool activeLast = active;
-
-		active = true;
-
-		if (!activeLast) {
-			TCCR1B = TCCR1B | _BV(CS12);
-		}
-		uint8_t *frame = reinterpret_cast<uint8_t *>(frameBuffer[indexInFrame]);
-
-		availableLength = min(availableLength, 180 - indexInFrame);
-		Serial.readBytes(frame + indexInPixel, availableLength);
-		indexInPixel += availableLength;
-
-		if (indexInPixel >= 180) {
-			indexInFrame = (indexInFrame + 1) % 5;
-
-			if (indexInFrame == indexOutFrame) {
-				indexInFrame = (indexOutFrame + 1) % 5;
-			}
-		}
-	} else {
-		active = false;
+	if (Serial.readBytes(reinterpret_cast<uint8_t *>(frameBuffer[0]), sizeof(frameBuffer[0])) == sizeof(frameBuffer[0])) {
+		ws2812b::write<2>(frameBuffer[0]);
 	}
 }
 
@@ -64,20 +41,24 @@ void setup() {
 	DDRB |= B00100000;
 	DDRD |= B00000100;
 
-	Serial.begin(9600);
+	Serial.begin(57600);
+	Serial.setTimeout(-1);
 
-	cli();
-	{
-		TCCR1A = 0;
-		TCCR1B = 0;
+	ws2812b::write<2>(frameBuffer[0]);
 
-		OCR1A  = 1562;							// ~40Hz or 25ms per frame
-		TCCR1B = _BV(WGM12) /*| _BV(CS12)*/;	// CTC mode, 256 pre-scaler
-
-		TCNT1  = 0;
-		TIMSK1 = _BV(OCIE1A);
-	}
-	sei();
+//	cli();
+//	{
+//		TCCR1A = 0;
+//		TCCR1B = 0;
+//
+//		OCR1A  = 62500;							// ~40Hz or 25ms per frame
+//		OCR1A  = 1562;							// ~40Hz or 25ms per frame
+//		TCCR1B = _BV(WGM12) /*| _BV(CS12)*/;	// CTC mode, 256 pre-scaler
+//
+//		TCNT1  = 0;
+//		TIMSK1 = _BV(OCIE1A);
+//	}
+//	sei();
 
 	PORTB = B00100000;
 }
