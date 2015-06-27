@@ -8,7 +8,6 @@
 #include "ASRTextScroller.h"
 
 #include <cmath>
-#include "bitutility.h"
 
 
 namespace asr {

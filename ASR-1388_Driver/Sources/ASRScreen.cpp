@@ -48,8 +48,13 @@ Screen::uunit_t *Screen::getLine(uunit_t lineIndex) {
 	return this->data + lineIndex;
 }
 
-Screen Screen::getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) const {
-	return Screen(*this);
+void Screen::flush() {
+	memset(data, 0x00, sizeof(data));
+}
+
+
+Screen &Screen::getViewport(unit_t x, unit_t y, uunit_t w, uunit_t h) {
+	return *this;
 }
 
 } /* namespace asr */

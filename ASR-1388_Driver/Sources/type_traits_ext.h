@@ -67,7 +67,7 @@ struct is_base_of {
 		operator B*() const;
 		operator D*();
 	};
-	static const bool value = (sizeof(check(_host(), 0)) == sizeof(_positive));
+	static const bool value = (sizeof(check(_host(), int())) == sizeof(_positive));
 };
 
 #endif /* ifndef ASR_TEST */
