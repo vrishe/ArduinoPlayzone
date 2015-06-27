@@ -5,6 +5,8 @@
  *      Author: Admin
  */
 
+#define WS2812B_HSV_DEMO
+
 #ifndef WS2812B_HSV_DEMO
 
 #include <Arduino.h>
@@ -15,21 +17,6 @@
 
 static ws2812b::color_rgb frameBuffer[1][60] = {};
 
-
-//static volatile size_t indexOutFrame, indexInFrame;
-
-//ISR(TIMER1_COMPA_vect) {
-//	ws2812b::write<2>(frameBuffer[indexOutFrame]);
-//
-//	if (++indexOutFrame == _countof(frameBuffer)) {
-//		TCCR1B = TCCR1B & ~_BV(CS12);
-//
-//		indexInFrame = 0;
-//	}
-//}
-
-
-//static size_t indexInPixel;
 
 void loop() {
 	if (Serial.readBytes(reinterpret_cast<uint8_t *>(frameBuffer[0]), sizeof(frameBuffer[0])) == sizeof(frameBuffer[0])) {
@@ -46,25 +33,12 @@ void setup() {
 
 	ws2812b::write<2>(frameBuffer[0]);
 
-//	cli();
-//	{
-//		TCCR1A = 0;
-//		TCCR1B = 0;
-//
-//		OCR1A  = 62500;							// ~40Hz or 25ms per frame
-//		OCR1A  = 1562;							// ~40Hz or 25ms per frame
-//		TCCR1B = _BV(WGM12) /*| _BV(CS12)*/;	// CTC mode, 256 pre-scaler
-//
-//		TCNT1  = 0;
-//		TIMSK1 = _BV(OCIE1A);
-//	}
-//	sei();
-
 	PORTB = B00100000;
 }
 
 #else  // ifdef WS2812B_HSV_DEMO
 
+#include <avr/pgmspace.h>
 #include <Arduino.h>
 #include <stdint.h>
 
@@ -73,7 +47,7 @@ void setup() {
 
 static ws2812b::Screen<2> screenMain;
 
-const byte dim_curve[] = {
+const byte dim_curve[] PROGMEM = {
     0,   1,   1,   2,   2,   2,   2,   2,   2,   3,   3,   3,   3,   3,   3,   3,
     3,   3,   3,   3,   3,   3,   3,   4,   4,   4,   4,   4,   4,   4,   4,   4,
     4,   4,   4,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   6,   6,   6,
@@ -97,9 +71,8 @@ void hsv2rgb(int hue, uint8_t sat, uint8_t val, ws2812b::color_rgb &output) {
      The dim_curve is used only on brightness/value and on saturation (inverted).
      This looks the most natural.
   */
-
-  val = dim_curve[val];
-  sat = 255-dim_curve[255-sat];
+  val = pgm_read_byte(dim_curve + val);
+  sat = 255 - pgm_read_byte(dim_curve + 255 - sat);
 
   if (sat == 0) { // Acromatic color (gray). Hue doesn't mind.
     output.r=val;
