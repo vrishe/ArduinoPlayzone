@@ -5,7 +5,7 @@
  *      Author: Admin
  */
 
-#define WS2812B_HSV_DEMO
+//#define WS2812B_HSV_DEMO
 
 #ifndef WS2812B_HSV_DEMO
 
@@ -15,25 +15,46 @@
 #include "ws2812b_write.h"
 #include "ws2812b_types.h"
 
-static ws2812b::color_rgb frameBuffer[1][60] = {};
+static ws2812b::color_rgb frameBuffer[60] = {};
 
+
+static bool stateChange;
 
 void loop() {
-	if (Serial.readBytes(reinterpret_cast<uint8_t *>(frameBuffer[0]), sizeof(frameBuffer[0])) == sizeof(frameBuffer[0])) {
-		ws2812b::write<2>(frameBuffer[0]);
+	if (Serial.available()) {
+		byte *frame = reinterpret_cast<byte *>(frameBuffer);
+
+		byte countRead = 0;
+		while (countRead < sizeof(frameBuffer)) {
+			int value = Serial.read();
+
+			if (value >= 0x00) {
+				*frame++ = static_cast<byte>(value);
+
+				++countRead;
+			}
+		}
+		ws2812b::write<2>(frameBuffer);
+
+		stateChange = true;
+	} else {
+		if (stateChange) {
+			stateChange = false;
+			memset(frameBuffer, 0x00, sizeof(frameBuffer));
+
+			ws2812b::write<2>(frameBuffer);
+		}
 	}
 }
 
 void setup() {
-	DDRB |= B00100000;
-	DDRD |= B00000100;
+	DDRD |= _BV(DDD2);
+	ws2812b::write<2>(frameBuffer);
 
-	Serial.begin(57600);
-	Serial.setTimeout(-1);
+	Serial.begin(62500);
 
-	ws2812b::write<2>(frameBuffer[0]);
-
-	PORTB = B00100000;
+	DDRB |= _BV(DDB5);
+	PORTB = _BV(PB5);
 }
 
 #else  // ifdef WS2812B_HSV_DEMO
