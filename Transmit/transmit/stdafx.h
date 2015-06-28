@@ -16,6 +16,8 @@
 // C++ Header files
 #include <string>
 #include <iostream>
+#include <map>
+#include <vector>
 
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
