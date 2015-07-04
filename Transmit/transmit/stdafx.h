@@ -14,10 +14,10 @@
 #include <tchar.h>
 
 // C++ Header files
-#include <string>
 #include <iostream>
-#include <map>
 #include <vector>
+#include <string>
+#include <map>
 
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers

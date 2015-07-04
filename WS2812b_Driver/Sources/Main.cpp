@@ -22,6 +22,7 @@ static bool stateChange;
 
 void loop() {
 	if (Serial.available()) {
+#ifdef READ_MANUAL
 		byte *frame = reinterpret_cast<byte *>(frameBuffer);
 
 		byte countRead = 0;
@@ -37,6 +38,9 @@ void loop() {
 		ws2812b::write<2>(frameBuffer);
 
 		stateChange = true;
+#else
+		Serial.readBytes(reinterpret_cast<byte*>(frameBuffer), sizeof(frameBuffer));
+#endif // MANUAL_READ
 	} else {
 		if (stateChange) {
 			stateChange = false;
