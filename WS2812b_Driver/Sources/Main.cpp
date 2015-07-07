@@ -15,13 +15,22 @@
 #include "ws2812b_write.h"
 #include "ws2812b_types.h"
 
+
 static ws2812b::color_rgb frameBuffer[60] = {};
+
+
+void fillColor(ws2812b::color_rgb *frameBuffer, size_t count, const ws2812b::color_rgb &color);
+
+template<size_t count>
+void fillColor(ws2812b::color_rgb (&frameBuffer)[count], const ws2812b::color_rgb &color) {
+	fillColor(frameBuffer, count, color);
+}
 
 
 static bool stateChange;
 
 void loop() {
-	if (Serial.available()) {
+	if (!!Serial.available()) {
 #ifdef READ_MANUAL
 		byte *frame = reinterpret_cast<byte *>(frameBuffer);
 
@@ -35,17 +44,18 @@ void loop() {
 				++countRead;
 			}
 		}
-		ws2812b::write<2>(frameBuffer);
-
-		stateChange = true;
 #else
 		Serial.readBytes(reinterpret_cast<byte*>(frameBuffer), sizeof(frameBuffer));
 #endif // MANUAL_READ
+
+		ws2812b::write<2>(frameBuffer);
+
+		stateChange = true;
 	} else {
 		if (stateChange) {
 			stateChange = false;
-			memset(frameBuffer, 0x00, sizeof(frameBuffer));
 
+			memset(frameBuffer, 0x00, sizeof(frameBuffer));
 			ws2812b::write<2>(frameBuffer);
 		}
 	}
@@ -53,12 +63,44 @@ void loop() {
 
 void setup() {
 	DDRD |= _BV(DDD2);
-	ws2812b::write<2>(frameBuffer);
 
 	Serial.begin(62500);
 
 	DDRB |= _BV(DDB5);
 	PORTB = _BV(PB5);
+
+	ws2812b::color_rgb color;
+
+	color.r = 0xff;
+	color.g = 0x00;
+	color.b = 0x00;
+	fillColor(frameBuffer, color);
+	ws2812b::write<2>(frameBuffer);
+	delay(500);
+
+	color.r = 0x00;
+	color.g = 0xff;
+	color.b = 0x00;
+	fillColor(frameBuffer, color);
+	ws2812b::write<2>(frameBuffer);
+	delay(500);
+
+	color.r = 0x00;
+	color.g = 0x00;
+	color.b = 0xff;
+	fillColor(frameBuffer, color);
+	ws2812b::write<2>(frameBuffer);
+	delay(500);
+
+	memset(reinterpret_cast<byte*>(&frameBuffer), 0x00, sizeof(frameBuffer));
+	ws2812b::write<2>(frameBuffer);
+}
+
+
+void fillColor(ws2812b::color_rgb *frameBuffer, size_t count, const ws2812b::color_rgb &color) {
+	while(count > 0) {
+		frameBuffer[--count] = color;
+	}
 }
 
 #else  // ifdef WS2812B_HSV_DEMO

@@ -146,7 +146,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				if (!GetCommState(hComm, &portDcb)) {
 					return DisplayError(_T("GetCommState"));
 				}
-				if (!BuildCommDCB(&::string::format(_T("baud=%d data=%d parity=%s stop=%s"), baud, data, parity, stop)[0], &portDcb)) {
+				if (!BuildCommDCB(&::string::format(_T("baud=%d data=%d parity=%s stop=%s"), baud, data, &parity[0], &stop[0])[0], &portDcb)) {
 					return DisplayError(_T("BuildCommDCB"));
 				}
 			}
