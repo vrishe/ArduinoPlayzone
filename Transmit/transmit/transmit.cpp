@@ -15,7 +15,7 @@
 #endif
 
 
-BOOL WaitIO(BOOL result, HANDLE hFile, OVERLAPPED &overlapped, LPDWORD bytesTransferred, DWORD timeout = INFINITE);
+BOOL WaitIO(BOOL result, HANDLE hFile, OVERLAPPED &overlapped, LPDWORD bytesTransferred, BOOL cleanUp = TRUE, DWORD timeout = INFINITE);
 
 
 // Routine Description:
@@ -26,13 +26,13 @@ std::map<std::_tstring, std::_tstring> readArgs(int argc, _TCHAR *argv[], std::v
 	size_t paramsCount, const _TCHAR *params, const _TCHAR *const paramsExt[]);
 
 
-static const _TCHAR *paramsExtended[] = { _T("help"), _T("scan"), _T("baud="), _T("dps=") };
+static const _TCHAR *paramsExtended[] = { _T("help"), _T("cts"), _T("scan"), _T("baud="), _T("dps=") };
 
 int _tmain(int argc, _TCHAR* argv[]) 
 {
 	std::vector<std::_tstring> argsFree;
 	std::map<std::_tstring, std::_tstring> argsBound 
-		= readArgs(argc, argv, &argsFree, 4, _T("hs:b:d:"), paramsExtended);
+		= readArgs(argc, argv, &argsFree, 4, _T("hcs:b:d:"), paramsExtended);
 
 	// This is NOT a 'help' query block.
 	if (argsBound.find(_T("h")) == argsBound.end()
@@ -122,6 +122,8 @@ int _tmain(int argc, _TCHAR* argv[])
 				BYTE			data	= 8;
 				std::_tstring	parity	= _T("N");
 				std::_tstring	stop	= _T("1");
+				bool			octs = (arguments = argsBound.find(_T("c"))) != argsBound.end()
+										|| (arguments = argsBound.find(_T("cts"))) != argsBound.end();
 				
 				if ((arguments = argsBound.find(_T("d:"))) != argsBound.end()
 					|| (arguments = argsBound.find(_T("dps="))) != argsBound.end()) {
@@ -146,7 +148,9 @@ int _tmain(int argc, _TCHAR* argv[])
 				if (!GetCommState(hComm, &portDcb)) {
 					return DisplayError(_T("GetCommState"));
 				}
-				if (!BuildCommDCB(&::string::format(_T("baud=%d data=%d parity=%s stop=%s"), baud, data, &parity[0], &stop[0])[0], &portDcb)) {
+				if (!BuildCommDCB(&::string::format(_T("baud=%d data=%d parity=%s stop=%s octs=%s"), 
+					baud, data, &parity[0], &stop[0], octs ? _T("on") : _T("off"))[0], &portDcb)) {
+
 					return DisplayError(_T("BuildCommDCB"));
 				}
 			}
@@ -177,7 +181,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 				return -2;
 			}
-			std::auto_ptr<BYTE> data(new BYTE[sizeFile.QuadPart]);
+			LPBYTE data = new BYTE[sizeFile.QuadPart];
 			{
 				OVERLAPPED osRead = {};
 				{
@@ -189,7 +193,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				}
 				DWORD bytesTransferred;
 
-				if (!WaitIO(ReadFile(hFile, data.get(), sizeFile.LowPart, NULL, &osRead), hFile, osRead, &bytesTransferred)) {
+				if (!WaitIO(ReadFile(hFile, data, sizeFile.LowPart, NULL, &osRead), hFile, osRead, &bytesTransferred)) {
 					return DisplayError(_T("ReadFile"));
 				}
 				std::_tcout << _T("Source file of data found... ");
@@ -204,24 +208,47 @@ int _tmain(int argc, _TCHAR* argv[])
 						return DisplayError(_T("CreateEvent"));
 					}
 				}
-				if (!WaitIO(WriteFile(hComm, data.get(), bytesTransferred, &bytesTransferred, &osTransmit), hComm, osTransmit, &bytesTransferred)) {
+				if (portDcb.fOutxCtsFlow) {
+					DWORD commStatus;
+
+					if (!GetCommModemStatus(hComm, &commStatus)) {
+						return DisplayError(_T("GetCommModemStatus"));
+					}
+					if ((commStatus & MS_CTS_ON) == 0) {
+						DWORD commMask;
+						if (!(GetCommMask(hComm, &commMask) 
+							&& SetCommMask(hComm, commMask | EV_CTS))) {
+							return DisplayError(_T("SetCommMask"));
+						}
+						std::_tcout << _T("Waiting for CTS signal... ");
+
+						DWORD ignore;
+						if (!WaitIO(WaitCommEvent(hComm, &commMask, &osTransmit), hComm, osTransmit, &ignore, FALSE)) {
+							return DisplayError(_T("WaitCommEvent"));
+						}
+						ResetEvent(osTransmit.hEvent);
+					}
+				}
+				if (!WaitIO(WriteFile(hComm, data, bytesTransferred, &bytesTransferred, &osTransmit), hComm, osTransmit, &bytesTransferred)) {
 					return DisplayError(_T("WriteFile"));
 				}
 				std::_tcout << string::format(_T("Bytes written: %d"), bytesTransferred) << std::endl;
 				std::_tcout << _T("Done!") << std::endl;
 			}
-			data.release();
+			delete[] data;
 
 			return 0;
 		}
 	}
-	std::_tcout << _T("transmit[.exe] <port: e.g. COM3> <file binary source path> [-b, -d]") << std::endl;
+	std::_tcout << _T("transmit[.exe] <port: e.g. COM3> <file binary source path> [-b, -d, -c]") << std::endl;
 	std::_tcout << _T(" this call perfroms data transmission from the source file to the port given.") << std::endl << std::endl;
 	std::_tcout << _T(" Additional parameters are:") << std::endl;
 	std::_tcout << _T("  -b:<baudrate> | --baud=<baudrate>  - specify the baudrate to perform data") << std::endl;
 	std::_tcout << _T("                                       transfer at (e.g.: 76500 or 115200);") << std::endl << std::endl;
 	std::_tcout << _T("  -d:D;P;S | --dps=D;P;S             - specify transmission config in") << std::endl;
 	std::_tcout << _T("                                       D/P/S format (e.g.: 8;N;1 or 7;E;1.5).") << std::endl << std::endl;
+	std::_tcout << _T("  -d | --cts                         - enable CTS assertion before") << std::endl;
+	std::_tcout << _T("                                       transmission.") << std::endl << std::endl;
 
 	std::_tcout << _T("transmit[.exe] [-s:<port max index> | --scan(=10max)]") << std::endl;
 	std::_tcout << _T(" this call will return a list of available communication ports up to the") << std::endl;
@@ -235,7 +262,7 @@ int _tmain(int argc, _TCHAR* argv[])
 }
 
 
-BOOL WaitIO(BOOL result, HANDLE hFile, OVERLAPPED &overlapped, LPDWORD bytesTransferred, DWORD timeout) {
+BOOL WaitIO(BOOL result, HANDLE hFile, OVERLAPPED &overlapped, LPDWORD bytesTransferred, BOOL cleanUp, DWORD timeout) {
 	if (!result) {
 		if (GetLastError() != ERROR_IO_PENDING) {
 			// WriteFile failed, but isn't delayed. Report error and abort.
@@ -271,11 +298,12 @@ BOOL WaitIO(BOOL result, HANDLE hFile, OVERLAPPED &overlapped, LPDWORD bytesTran
 		// WriteFile completed immediately.
 		result = TRUE;
 	}
-	if (overlapped.hEvent != NULL && overlapped.hEvent != INVALID_HANDLE_VALUE) {
-		CloseHandle(overlapped.hEvent);
+	if (cleanUp) {
+		if (overlapped.hEvent != NULL && overlapped.hEvent != INVALID_HANDLE_VALUE) {
+			CloseHandle(overlapped.hEvent);
+		}
+		CloseHandle(hFile);
 	}
-	CloseHandle(hFile);
-
 	return result;
 }
 
