@@ -5,7 +5,9 @@
  *      Author: Admin
  */
 
-#define WS2812B_HSV_DEMO
+//#define WS2812B_HSV_DEMO
+//#define READ_MANUAL
+
 
 #ifndef WS2812B_HSV_DEMO
 
@@ -15,25 +17,97 @@
 #include "ws2812b_write.h"
 #include "ws2812b_types.h"
 
-static ws2812b::color_rgb frameBuffer[1][60] = {};
 
+static ws2812b::color_rgb frameBuffer[60] = {};
+
+
+void fillColor(ws2812b::color_rgb *frameBuffer, size_t count, const ws2812b::color_rgb &color);
+
+template<size_t count>
+void fillColor(ws2812b::color_rgb (&frameBuffer)[count], const ws2812b::color_rgb &color) {
+	fillColor(frameBuffer, count, color);
+}
+
+
+static bool stateChange;
 
 void loop() {
-	if (Serial.readBytes(reinterpret_cast<uint8_t *>(frameBuffer[0]), sizeof(frameBuffer[0])) == sizeof(frameBuffer[0])) {
-		ws2812b::write<2>(frameBuffer[0]);
+	if (!!Serial.available()) {
+#ifdef READ_MANUAL
+		byte *frame = reinterpret_cast<byte *>(frameBuffer);
+
+		byte countRead = 0;
+		while (countRead < sizeof(frameBuffer)) {
+			int value = Serial.read();
+
+			if (value >= 0x00) {
+				*frame++ = static_cast<byte>(value);
+
+				++countRead;
+			}
+		}
+#else
+		Serial.readBytes(reinterpret_cast<byte*>(frameBuffer), sizeof(frameBuffer));
+#endif // MANUAL_READ
+
+		PORTD |=  _BV(PORTD2); // Disable CTS.
+		{
+			ws2812b::write<13>(frameBuffer);
+
+			stateChange = true;
+		}
+		PORTD &= ~_BV(PORTD2); // Enable CTS.
+	} else {
+		if (stateChange) {
+			stateChange = false;
+
+			memset(frameBuffer, 0x00, sizeof(frameBuffer));
+			ws2812b::write<13>(frameBuffer);
+		}
 	}
 }
 
 void setup() {
-	DDRB |= B00100000;
-	DDRD |= B00000100;
+	Serial.begin(62500);
 
-	Serial.begin(57600);
-	Serial.setTimeout(-1);
+	DDRB |= _BV(DDB5); // Pin 13 - display output.
+	DDRD |= _BV(DDD2); // Pin 2  - CTS signal output.
 
-	ws2812b::write<2>(frameBuffer[0]);
+	PORTB &= ~_BV(PORTB5);
+	PORTD &= ~_BV(PORTD2); // Enable CTS.
 
-	PORTB = B00100000;
+	ws2812b::color_rgb color;
+
+	color.r = 0xff;
+	color.g = 0x00;
+	color.b = 0x00;
+	fillColor(frameBuffer, color);
+	ws2812b::write<13>(frameBuffer);
+	delay(500);
+
+	color.r = 0x00;
+	color.g = 0xff;
+	color.b = 0x00;
+	fillColor(frameBuffer, color);
+	ws2812b::write<13>(frameBuffer);
+	delay(500);
+
+	color.r = 0x00;
+	color.g = 0x00;
+	color.b = 0xff;
+	fillColor(frameBuffer, color);
+	ws2812b::write<13>(frameBuffer);
+	delay(500);
+
+	memset(reinterpret_cast<byte*>(&frameBuffer), 0x00, sizeof(frameBuffer));
+	ws2812b::write<13>(frameBuffer);
+}
+
+
+void fillColor(ws2812b::color_rgb *frameBuffer, size_t count, const ws2812b::color_rgb &color) {
+	while(count > 0) {
+		frameBuffer[--count] = color;
+	}
 }
 
 #else  // ifdef WS2812B_HSV_DEMO
@@ -74,7 +148,7 @@ void hsv2rgb(int hue, uint8_t sat, uint8_t val, ws2812b::color_rgb &output) {
   val = pgm_read_byte(dim_curve + val);
   sat = 255 - pgm_read_byte(dim_curve + 255 - sat);
 
-  if (sat == 0) { // Acromatic color (gray). Hue doesn't mind.
+  if (sat == 0) { // Achromatic color (gray). Hue doesn't mind.
     output.r=val;
     output.g=val;
     output.b=val;
