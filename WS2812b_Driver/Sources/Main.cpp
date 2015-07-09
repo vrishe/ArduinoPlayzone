@@ -6,6 +6,8 @@
  */
 
 //#define WS2812B_HSV_DEMO
+//#define READ_MANUAL
+
 
 #ifndef WS2812B_HSV_DEMO
 
@@ -48,26 +50,31 @@ void loop() {
 		Serial.readBytes(reinterpret_cast<byte*>(frameBuffer), sizeof(frameBuffer));
 #endif // MANUAL_READ
 
-		ws2812b::write<2>(frameBuffer);
+		PORTD |=  _BV(PORTD2); // Disable CTS.
+		{
+			ws2812b::write<13>(frameBuffer);
 
-		stateChange = true;
+			stateChange = true;
+		}
+		PORTD &= ~_BV(PORTD2); // Enable CTS.
 	} else {
 		if (stateChange) {
 			stateChange = false;
 
 			memset(frameBuffer, 0x00, sizeof(frameBuffer));
-			ws2812b::write<2>(frameBuffer);
+			ws2812b::write<13>(frameBuffer);
 		}
 	}
 }
 
 void setup() {
-	DDRD |= _BV(DDD2);
-
 	Serial.begin(62500);
 
-	DDRB |= _BV(DDB5);
-	PORTB = _BV(PB5);
+	DDRB |= _BV(DDB5); // Pin 13 - display output.
+	DDRD |= _BV(DDD2); // Pin 2  - CTS signal output.
+
+	PORTB &= ~_BV(PORTB5);
+	PORTD &= ~_BV(PORTD2); // Enable CTS.
 
 	ws2812b::color_rgb color;
 
@@ -75,25 +82,25 @@ void setup() {
 	color.g = 0x00;
 	color.b = 0x00;
 	fillColor(frameBuffer, color);
-	ws2812b::write<2>(frameBuffer);
+	ws2812b::write<13>(frameBuffer);
 	delay(500);
 
 	color.r = 0x00;
 	color.g = 0xff;
 	color.b = 0x00;
 	fillColor(frameBuffer, color);
-	ws2812b::write<2>(frameBuffer);
+	ws2812b::write<13>(frameBuffer);
 	delay(500);
 
 	color.r = 0x00;
 	color.g = 0x00;
 	color.b = 0xff;
 	fillColor(frameBuffer, color);
-	ws2812b::write<2>(frameBuffer);
+	ws2812b::write<13>(frameBuffer);
 	delay(500);
 
 	memset(reinterpret_cast<byte*>(&frameBuffer), 0x00, sizeof(frameBuffer));
-	ws2812b::write<2>(frameBuffer);
+	ws2812b::write<13>(frameBuffer);
 }
 
 
@@ -141,7 +148,7 @@ void hsv2rgb(int hue, uint8_t sat, uint8_t val, ws2812b::color_rgb &output) {
   val = pgm_read_byte(dim_curve + val);
   sat = 255 - pgm_read_byte(dim_curve + 255 - sat);
 
-  if (sat == 0) { // Acromatic color (gray). Hue doesn't mind.
+  if (sat == 0) { // Achromatic color (gray). Hue doesn't mind.
     output.r=val;
     output.g=val;
     output.b=val;

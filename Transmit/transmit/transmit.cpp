@@ -153,6 +153,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 					return DisplayError(_T("BuildCommDCB"));
 				}
+				portDcb.fAbortOnError = TRUE;
 			}
 			if (!SetCommState(hComm, &portDcb)) {
 				return DisplayError(_T("SetCommState"));
@@ -181,7 +182,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 				return -2;
 			}
-			LPBYTE data = new BYTE[sizeFile.QuadPart];
+			std::vector<BYTE> data(sizeFile.QuadPart);
 			{
 				OVERLAPPED osRead = {};
 				{
@@ -193,12 +194,13 @@ int _tmain(int argc, _TCHAR* argv[])
 				}
 				DWORD bytesTransferred;
 
-				if (!WaitIO(ReadFile(hFile, data, sizeFile.LowPart, NULL, &osRead), hFile, osRead, &bytesTransferred)) {
+				if (!WaitIO(ReadFile(hFile, &data[0], sizeFile.LowPart, NULL, &osRead), 
+					hFile, osRead, &bytesTransferred)) {
+
 					return DisplayError(_T("ReadFile"));
 				}
 				std::_tcout << _T("Source file of data found... ");
 				std::_tcout << string::format(_T("Bytes read: %d"), bytesTransferred) << std::endl;
-				std::_tcout << _T("Transferring data... ");
 
 				OVERLAPPED osTransmit = {};
 				{
@@ -229,14 +231,16 @@ int _tmain(int argc, _TCHAR* argv[])
 						ResetEvent(osTransmit.hEvent);
 					}
 				}
-				if (!WaitIO(WriteFile(hComm, data, bytesTransferred, &bytesTransferred, &osTransmit), hComm, osTransmit, &bytesTransferred)) {
+				std::_tcout << _T("Transferring data... ");
+
+				if (!WaitIO(WriteFile(hComm, &data[0], bytesTransferred, &bytesTransferred, &osTransmit),
+					hComm, osTransmit, &bytesTransferred)) {
+
 					return DisplayError(_T("WriteFile"));
 				}
 				std::_tcout << string::format(_T("Bytes written: %d"), bytesTransferred) << std::endl;
 				std::_tcout << _T("Done!") << std::endl;
 			}
-			delete[] data;
-
 			return 0;
 		}
 	}
