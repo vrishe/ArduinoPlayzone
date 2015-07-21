@@ -174,15 +174,15 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			if (sizeFile.QuadPart > 100LL * 1024 * 1024) {
 				std::_tcout << string::format(
-					_T("It is possible to transmit files that NOT exceed 100Mb (%s is %dMb).",
+					_T("It is possible to transmit files that NOT exceed 100Mb (%s is %dMb)."),
 
 					argv[2],
-					sizeFile.QuadPart / 1024 / 1024)
+					sizeFile.QuadPart / 1024 / 1024
 				) << std::endl;
 
 				return -2;
 			}
-			std::vector<BYTE> data(sizeFile.QuadPart);
+			std::vector<BYTE> data(static_cast<size_t>(sizeFile.QuadPart));
 			{
 				OVERLAPPED osRead = {};
 				{
