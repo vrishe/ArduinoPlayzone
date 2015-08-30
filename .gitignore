@@ -1,6 +1,7 @@
 # Created by https://www.gitignore.io
 
 ### Eclipse ###
+.metadata
 /*/*[Dd]ebug
 /*/*[Rr]elease
 
@@ -15,12 +16,14 @@ ipch
 
 ### Project Specific ###
 /.private
-lib*.a
+/ArduinoCore
+/Blink
+/uClibc++
 
+lib*.a
 
 ### Plaftorm: Windows ###
 [Tt]humbs.db
-
 
 ### Platform: Mac OS X ###
 .DS_Store
