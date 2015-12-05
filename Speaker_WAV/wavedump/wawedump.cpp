@@ -46,11 +46,12 @@ static errno_t processFile(const std::_tstring &path, bool verbose) {
 	if (_tfopen_s(&input, ptrPath, _T("rb")) == 0) {
 		bool output = false;
 
-		audio::label_t referenceHeader = { 'R', 'I', 'F', 'F' };
-		audio::label_t referenceData = { 'd', 'a', 't', 'a' };
-
+		audio::label_t referenceHeader	= { 'R', 'I', 'F', 'F' };
+		audio::label_t referenceList	= { 'L', 'I', 'S', 'T' };
+		audio::label_t referenceData	= { 'd', 'a', 't', 'a' };
+		
 		audio::wav_header_chunk chunkHeader;
-		audio::wav_data_chunk	chunkData;
+		audio::wav_chunk		chunkData;
 
 		if (fread_s(&chunkHeader, sizeof(chunkHeader), sizeof(chunkHeader), 1, input) < 1) {
 			LEAVE_WITH_ERROR(EFAULT);
@@ -63,13 +64,16 @@ static errno_t processFile(const std::_tstring &path, bool verbose) {
 		if (fread_s(&chunkData, sizeof(chunkData), sizeof(chunkData), 1, input) < 1) {
 			LEAVE_WITH_ERROR(EFAULT);
 		}
-		size_t curPosition = ftell(input);
+		if (chunkData.chunkId.value == referenceList.value) {
+			fseek(input, chunkData.chunkSize, SEEK_CUR);
 
-		if (chunkData.subchunk2Id.value != referenceData.value
-			|| fseek(input, 0, SEEK_END) - curPosition < chunkData.subchunk2Size) {
+			if (fread_s(&chunkData, sizeof(chunkData), sizeof(chunkData), 1, input) < 1) {
+				LEAVE_WITH_ERROR(EFAULT);
+			}
+		}
+		if (chunkData.chunkId.value != referenceData.value) {
 			LEAVE_WITH_ERROR(EFAULT);
 		}
-		fseek(input, curPosition, SEEK_SET);
 
 		// Write file's name and location.
 		LPTSTR filePath = new TCHAR[MAX_PATH + 1];
@@ -94,11 +98,11 @@ static errno_t processFile(const std::_tstring &path, bool verbose) {
 		WRITE_HEADER_FIELD1(chunkHeader, byteRate);
 		WRITE_HEADER_FIELD1(chunkHeader, blockAlign);
 		WRITE_HEADER_FIELD1(chunkHeader, bitsPerSample);
-		WRITE_HEADER_FIELD2(chunkData, subchunk2Id);
-		WRITE_HEADER_FIELD1(chunkData, subchunk2Size);
+		WRITE_HEADER_FIELD2(chunkData, chunkId);
+		WRITE_HEADER_FIELD1(chunkData, chunkSize);
 		
 		if (verbose) {
-			size_t bufferLength = min(chunkData.subchunk2Size, 32767);
+			size_t bufferLength = min(chunkData.chunkSize, 32767);
 			uint8_t *buffer = new uint8_t[bufferLength];
 			{
 				std::stringstream ss;

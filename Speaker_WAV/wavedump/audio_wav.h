@@ -10,11 +10,16 @@ union label_t {
 	uint32_t	value;
 };
 
+
 #pragma pack(push, 1)
-struct wav_header_chunk {
-	// Title
+
+struct wav_chunk {
 	label_t  chunkId;
 	uint32_t chunkSize;
+};
+
+struct wav_header_chunk : public wav_chunk {
+	// Title
 	label_t  format;
 
 	// Sub chunk WAV
@@ -28,13 +33,18 @@ struct wav_header_chunk {
 	uint16_t bitsPerSample;
 };
 
-struct wav_data_chunk {
-	// Sub chunk DATA
-	label_t  subchunk2Id;
-	uint32_t subchunk2Size;
+struct wav_list_chunk : public wav_chunk {
+	// Title
+	label_t	 listTypeId;
 
-	/* Read the audio data below */
+	/* Read the list sub-chunk data below */
 };
+
+struct wav_label_chunk : public wav_chunk {
+	uint32_t cuePointId;
+	int8_t *data; // Some ASCII text, null-terminated and padded
+};
+
 #pragma pack(pop)
 
 } /* namespace audio */
